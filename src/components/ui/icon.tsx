@@ -1,0 +1,227 @@
+// VigorLog - Font Awesome Icon Component
+// Vereinfachte Verwendung von Font Awesome Icons mit TypeScript Support
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+// Font Awesome Icon Mapping für VigorLog
+export const VigorLogIcons = {
+  // Navigation
+  home: 'fa-solid fa-house',
+  dashboard: 'fa-solid fa-gauge-high',
+  profile: 'fa-solid fa-user',
+  settings: 'fa-solid fa-gear',
+  logout: 'fa-solid fa-right-from-bracket',
+  
+  // User Roles
+  athlete: 'fa-solid fa-person-running',
+  coach: 'fa-solid fa-whistle',
+  parent: 'fa-solid fa-people-group',
+  admin: 'fa-solid fa-user-shield',
+  
+  // Health Metrics
+  sleep: 'fa-solid fa-bed',
+  fatigue: 'fa-solid fa-battery-quarter',
+  mood: 'fa-solid fa-face-smile',
+  pain: 'fa-solid fa-triangle-exclamation',
+  heart: 'fa-solid fa-heart-pulse',
+  health: 'fa-solid fa-stethoscope',
+  
+  // Sports
+  football: 'fa-solid fa-futbol',
+  basketball: 'fa-solid fa-basketball',
+  tennis: 'fa-solid fa-tennis-ball',
+  squash: 'fa-solid fa-racquet',
+  swimming: 'fa-solid fa-person-swimming',
+  baseball: 'fa-solid fa-baseball',
+  americanFootball: 'fa-solid fa-football',
+  volleyball: 'fa-solid fa-volleyball',
+  golf: 'fa-solid fa-golf-ball-tee',
+  running: 'fa-solid fa-person-running',
+  cycling: 'fa-solid fa-person-biking',
+  
+  // Actions
+  add: 'fa-solid fa-plus',
+  edit: 'fa-solid fa-pen-to-square',
+  delete: 'fa-solid fa-trash',
+  save: 'fa-solid fa-floppy-disk',
+  cancel: 'fa-solid fa-xmark',
+  search: 'fa-solid fa-magnifying-glass',
+  filter: 'fa-solid fa-filter',
+  
+  // Status & Alerts
+  success: 'fa-solid fa-circle-check',
+  warning: 'fa-solid fa-triangle-exclamation',
+  error: 'fa-solid fa-circle-xmark',
+  info: 'fa-solid fa-circle-info',
+  notification: 'fa-solid fa-bell',
+  
+  // Data & Charts
+  chart: 'fa-solid fa-chart-line',
+  stats: 'fa-solid fa-chart-column',
+  trend: 'fa-solid fa-arrow-trend-up',
+  calendar: 'fa-solid fa-calendar-days',
+  clock: 'fa-solid fa-clock',
+  
+  // Communication
+  message: 'fa-solid fa-comment',
+  email: 'fa-solid fa-envelope',
+  phone: 'fa-solid fa-phone',
+  
+  // Gamification
+  trophy: 'fa-solid fa-trophy',
+  medal: 'fa-solid fa-medal',
+  star: 'fa-solid fa-star',
+  fire: 'fa-solid fa-fire-flame-curved',
+  
+  // System
+  loading: 'fa-solid fa-spinner',
+  download: 'fa-solid fa-download',
+  upload: 'fa-solid fa-upload',
+  print: 'fa-solid fa-print',
+  
+  // Arrows & Navigation
+  chevronDown: 'fa-solid fa-chevron-down',
+  chevronUp: 'fa-solid fa-chevron-up',
+  chevronLeft: 'fa-solid fa-chevron-left',
+  chevronRight: 'fa-solid fa-chevron-right',
+  arrowLeft: 'fa-solid fa-arrow-left',
+  arrowRight: 'fa-solid fa-arrow-right',
+} as const;
+
+export type IconName = keyof typeof VigorLogIcons;
+
+interface IconProps {
+  name: IconName;
+  className?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  spin?: boolean;
+  pulse?: boolean;
+  fixedWidth?: boolean;
+}
+
+const sizeClasses = {
+  xs: 'text-xs',
+  sm: 'text-sm',
+  md: 'text-base',
+  lg: 'text-lg',
+  xl: 'text-xl',
+  '2xl': 'text-2xl',
+};
+
+export function Icon({ 
+  name, 
+  className,
+  size = 'md',
+  spin = false,
+  pulse = false,
+  fixedWidth = false,
+  ...props 
+}: IconProps) {
+  const iconClass = VigorLogIcons[name];
+  const animationClasses = [
+    spin && 'fa-spin',
+    pulse && 'fa-pulse',
+    fixedWidth && 'fa-fw'
+  ].filter(Boolean).join(' ');
+
+  return (
+    <i
+      className={cn(
+        iconClass,
+        sizeClasses[size],
+        animationClasses,
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
+// Specialized Icon Components for common use cases
+export function HealthIcon({ metric, className, ...props }: { 
+  metric: 'sleep' | 'fatigue' | 'mood' | 'pain' | 'heart';
+  className?: string;
+} & Omit<IconProps, 'name'>) {
+  const iconMap = {
+    sleep: 'sleep' as const,
+    fatigue: 'fatigue' as const,
+    mood: 'mood' as const,
+    pain: 'pain' as const,
+    heart: 'heart' as const,
+  };
+
+  return <Icon name={iconMap[metric]} className={className} {...props} />;
+}
+
+export function RoleIcon({ role, className, ...props }: {
+  role: 'athlete' | 'coach' | 'parent' | 'admin';
+  className?: string;
+} & Omit<IconProps, 'name'>) {
+  return <Icon name={role} className={className} {...props} />;
+}
+
+export function StatusIcon({ status, className, ...props }: {
+  status: 'success' | 'warning' | 'error' | 'info';
+  className?: string;
+} & Omit<IconProps, 'name'>) {
+  return <Icon name={status} className={className} {...props} />;
+}
+
+export function SportIcon({ sport, className, ...props }: {
+  sport: string;
+  className?: string;
+} & Omit<IconProps, 'name'>) {
+  // Map common sports to icons
+  const sportIconMap: Record<string, IconName> = {
+    'fußball': 'football',
+    'soccer': 'football',
+    'football': 'americanFootball',
+    'american football': 'americanFootball',
+    'basketball': 'basketball',
+    'tennis': 'tennis',
+    'squash': 'squash',
+    'schwimmen': 'swimming',
+    'swimming': 'swimming',
+    'baseball': 'baseball',
+    'volleyball': 'volleyball',
+    'golf': 'golf',
+    'laufen': 'running',
+    'running': 'running',
+    'radfahren': 'cycling',
+    'cycling': 'cycling',
+  };
+
+  const iconName = sportIconMap[sport.toLowerCase()] || 'football';
+  return <Icon name={iconName} className={className} {...props} />;
+}
+
+// Loading Spinner Component
+export function LoadingIcon({ className, ...props }: {
+  className?: string;
+} & Omit<IconProps, 'name' | 'spin'>) {
+  return <Icon name="loading" spin className={className} {...props} />;
+}
+
+// Alert Icon with severity colors
+export function AlertIcon({ severity, className, ...props }: {
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  className?: string;
+} & Omit<IconProps, 'name'>) {
+  const severityColors = {
+    low: 'text-blue-600',
+    medium: 'text-orange-600', 
+    high: 'text-red-600',
+    critical: 'text-red-800',
+  };
+
+  return (
+    <Icon 
+      name={severity === 'critical' ? 'error' : 'warning'} 
+      className={cn(severityColors[severity], className)} 
+      {...props} 
+    />
+  );
+}
+
+export default Icon;
