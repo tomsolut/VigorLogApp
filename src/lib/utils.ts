@@ -109,7 +109,7 @@ export function calculateStreak(checkins: Array<{ date: string }>): number {
     .sort((a, b) => b.getTime() - a.getTime());
   
   let streak = 0;
-  let currentDate = new Date();
+  const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
   
   for (const checkinDate of sortedCheckins) {

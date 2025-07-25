@@ -28,6 +28,7 @@ export default function RootLayout({
         <script 
           src="https://kit.fontawesome.com/ee524abbd1.js" 
           crossOrigin="anonymous"
+          async
         />
       </head>
       <body

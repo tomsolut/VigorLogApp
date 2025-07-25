@@ -1,6 +1,23 @@
+'use client';
+
+import { useEffect } from 'react';
+import Link from 'next/link';
 import { Icon, HealthIcon, RoleIcon, SportIcon } from "@/components/ui/icon";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from '@/stores/auth';
 
 export default function Home() {
+  const { user, createDemoUsers, loginAsDemo } = useAuth();
+
+  useEffect(() => {
+    // Erstelle Demo-User beim ersten Laden
+    createDemoUsers();
+  }, [createDemoUsers]);
+
+  const handleDemoLogin = (role: 'athlete' | 'coach' | 'parent' | 'admin') => {
+    loginAsDemo(role);
+  };
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-blue-50 to-indigo-100">
       <main className="max-w-4xl mx-auto">
@@ -14,6 +31,91 @@ export default function Home() {
             Athleten-Monitoring für Jugendliche
           </p>
         </div>
+
+        {/* Demo Login Buttons */}
+        {!user && (
+          <Card className="mb-12">
+            <CardHeader>
+              <CardTitle className="text-center">
+                Demo-Zugang testen
+              </CardTitle>
+              <p className="text-center text-muted-foreground">
+                Wähle eine Rolle, um die App zu testen
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Button 
+                  onClick={() => handleDemoLogin('athlete')}
+                  className="h-16 flex-col gap-2"
+                  variant="outline"
+                >
+                  <RoleIcon role="athlete" className="text-blue-600" size="lg" />
+                  <span>Als Athlet</span>
+                </Button>
+                <Button 
+                  onClick={() => handleDemoLogin('coach')}
+                  className="h-16 flex-col gap-2"
+                  variant="outline"
+                >
+                  <RoleIcon role="coach" className="text-green-600" size="lg" />
+                  <span>Als Coach</span>
+                </Button>
+                <Button 
+                  onClick={() => handleDemoLogin('parent')}
+                  className="h-16 flex-col gap-2"
+                  variant="outline"
+                >
+                  <RoleIcon role="parent" className="text-purple-600" size="lg" />
+                  <span>Als Elternteil</span>
+                </Button>
+                <Button 
+                  onClick={() => handleDemoLogin('admin')}
+                  className="h-16 flex-col gap-2"
+                  variant="outline"
+                >
+                  <RoleIcon role="admin" className="text-orange-600" size="lg" />
+                  <span>Als Admin</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Current User Info */}
+        {user && (
+          <Card className="mb-12 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <RoleIcon role={user.role} className="text-green-600" size="lg" />
+                  <div>
+                    <h3 className="font-semibold">
+                      Angemeldet als {user.firstName} {user.lastName}
+                    </h3>
+                    <p className="text-sm text-muted-foreground capitalize">
+                      {user.role === 'athlete' ? 'Athlet' : 
+                       user.role === 'coach' ? 'Coach' :
+                       user.role === 'parent' ? 'Elternteil' : 'Administrator'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Link href={`/${user.role}`}>
+                    <Button>
+                      <Icon name="dashboard" className="mr-2" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button variant="outline" onClick={() => window.location.reload()}>
+                    <Icon name="logout" className="mr-2" />
+                    Abmelden
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* User Roles Demo */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
