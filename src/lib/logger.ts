@@ -27,8 +27,12 @@ class Logger {
     };
 
     // Stack trace für Errors
-    if (level === 'error') {
-      entry.stack = new Error().stack;
+    if (level === 'error' && typeof Error !== 'undefined') {
+      try {
+        entry.stack = new Error().stack;
+      } catch (e) {
+        // Ignore stack trace errors
+      }
     }
 
     // Speichere im Array

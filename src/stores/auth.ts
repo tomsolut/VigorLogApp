@@ -317,7 +317,7 @@ export const useAuthStore = create<AuthState>()(
             role: 'parent',
             createdAt: new Date().toISOString(),
             isActive: true,
-            childrenIds: ['demo-athlete-1'],
+            childrenIds: ['demo-athlete-1', 'demo-athlete-2'],
             phoneNumber: '+49 123 456789',
             emergencyContact: true,
             hasDataConsent: true,
@@ -364,7 +364,10 @@ export const useAuthStore = create<AuthState>()(
         
         try {
           const users = storage.getUsers();
-          logger.debug('AuthStore', 'Available users', { count: users.length });
+          logger.debug('AuthStore', 'Available users', { 
+            count: users.length,
+            users: users.map(u => ({ id: u.id, role: u.role, name: `${u.firstName} ${u.lastName}` }))
+          });
           
           // Find demo user - either with demo- prefix or the specific IDs from demo-data
           const demoUser = users.find(u => {
@@ -376,6 +379,8 @@ export const useAuthStore = create<AuthState>()(
             // New demo users from demo-data.ts
             if (role === 'coach' && (u.id === 'coach-1' || u.id === 'demo-coach-1')) return true;
             if (role === 'athlete' && ['athlete-1', 'athlete-2', 'athlete-3', 'athlete-4', 'athlete-5', 'demo-athlete-2'].includes(u.id)) return true;
+            if (role === 'parent' && u.id === 'demo-parent-1') return true;
+            if (role === 'admin' && u.id === 'demo-admin-1') return true;
             
             return false;
           });
@@ -393,8 +398,38 @@ export const useAuthStore = create<AuthState>()(
               name: `${demoUser.firstName} ${demoUser.lastName}`
             });
           } else {
-            logger.error('AuthStore', 'Demo user not found', { role });
-            set({ error: `Demo-${role} nicht gefunden` });
+            logger.error('AuthStore', 'Demo user not found, creating demo users', { role });
+            
+            // Try to create demo users and retry
+            get().createDemoUsers();
+            
+            // Wait a bit for users to be created
+            setTimeout(() => {
+              const retryUsers = storage.getUsers();
+              const retryDemoUser = retryUsers.find(u => {
+                if (u.role !== role) return false;
+                if (u.id.startsWith('demo-')) return true;
+                if (role === 'coach' && (u.id === 'coach-1' || u.id === 'demo-coach-1')) return true;
+                if (role === 'athlete' && ['athlete-1', 'athlete-2', 'athlete-3', 'athlete-4', 'athlete-5', 'demo-athlete-2'].includes(u.id)) return true;
+                if (role === 'parent' && u.id === 'demo-parent-1') return true;
+                if (role === 'admin' && u.id === 'demo-admin-1') return true;
+                return false;
+              });
+              
+              if (retryDemoUser) {
+                set({ 
+                  currentUser: retryDemoUser, 
+                  isAuthenticated: true, 
+                  error: null 
+                });
+                logger.info('AuthStore', 'Demo login successful after retry', {
+                  userId: retryDemoUser.id,
+                  role: retryDemoUser.role
+                });
+              } else {
+                set({ error: `Demo-${role} konnte nicht erstellt werden` });
+              }
+            }, 200);
           }
         } catch (error) {
           logger.error('AuthStore', 'Demo login failed', { error, role });
@@ -559,7 +594,7 @@ export const useAuthStore = create<AuthState>()(
         currentUser: state.currentUser,
         isAuthenticated: state.isAuthenticated,
       }),
-      skipHydration: true,
+      skipHydration: false,
     }
   )
 );
@@ -587,9 +622,18 @@ export const useAuth = () => {
   };
 };
 
-// Initialize store hydration on client side
+// Client-side initialization
 if (typeof window !== 'undefined') {
-  useAuthStore.persist.rehydrate();
+  // Wait for hydration to complete before creating demo users
+  setTimeout(() => {
+    const state = useAuthStore.getState();
+    const users = storage.getUsers();
+    
+    // If no users exist, create demo users
+    if (users.length === 0) {
+      state.createDemoUsers();
+    }
+  }, 100);
 }
 
 // Helper für Permission-Checks

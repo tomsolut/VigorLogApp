@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Icon, HealthIcon, RoleIcon, SportIcon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { storage } from '@/lib/storage';
 
 export default function Home() {
   const { user, createDemoUsers, loginAsDemo, logout } = useAuth();
+  const router = useRouter();
   const [showAthleteChoice, setShowAthleteChoice] = useState(false);
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -68,22 +70,28 @@ export default function Home() {
           userId: specificUser.id,
           role: specificUser.role 
         });
-        window.location.href = `/${specificUser.role}`;
+        router.push(`/${specificUser.role}`);
       } else {
         logger.error('HomePage', 'Specific user not found', { specificUserId });
         // Fallback to regular demo login
         loginAsDemo(role);
       }
     } else {
-      // For role-based login, clear and recreate
-      localStorage.clear();
-      createDemoUsers();
-      setTimeout(() => {
-        initializeDemoData();
+      // Check if demo users exist
+      const users = storage.getUsers();
+      if (users.length === 0) {
+        // Create demo users if they don't exist
+        createDemoUsers();
         setTimeout(() => {
-          loginAsDemo(role);
-        }, 300);
-      }, 100);
+          initializeDemoData();
+          setTimeout(() => {
+            loginAsDemo(role);
+          }, 500);
+        }, 200);
+      } else {
+        // Users exist, just login
+        loginAsDemo(role);
+      }
     }
   };
 
@@ -211,13 +219,31 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button asChild>
-                    <Link href={`/${user.role}`}>
-                      <Icon name="dashboard" className="mr-2" />
-                      Dashboard
-                    </Link>
+                  <Button 
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Dashboard button clicked, navigating to:', `/${user.role}`);
+                      console.log('Current auth state:', { 
+                        isAuthenticated: useAuthStore.getState().isAuthenticated,
+                        user: useAuthStore.getState().currentUser 
+                      });
+                      router.push(`/${user.role}`);
+                    }}
+                  >
+                    <Icon name="dashboard" className="mr-2" />
+                    Dashboard
                   </Button>
-                  <Button variant="outline" onClick={logout}>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      logout();
+                    }}
+                  >
                     <Icon name="logout" className="mr-2" />
                     Abmelden
                   </Button>

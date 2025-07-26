@@ -60,17 +60,25 @@ export const VigorLogIcons = {
   
   // Data & Charts
   chart: 'fa-solid fa-chart-line',
+  'chart-line': 'fa-solid fa-chart-line',
   stats: 'fa-solid fa-chart-column',
   trend: 'fa-solid fa-arrow-trend-up',
   calendar: 'fa-solid fa-calendar-days',
+  'calendar-check': 'fa-solid fa-calendar-check',
+  'calendar-plus': 'fa-solid fa-calendar-plus',
   clock: 'fa-solid fa-clock',
   bolt: 'fa-solid fa-bolt',
   
   // Communication
   message: 'fa-solid fa-comment',
+  comment: 'fa-solid fa-comment',
+  comments: 'fa-solid fa-comments',
   email: 'fa-solid fa-envelope',
+  envelope: 'fa-solid fa-envelope',
   phone: 'fa-solid fa-phone',
   'party-horn': 'fa-solid fa-champagne-glasses',
+  'file-contract': 'fa-solid fa-file-contract',
+  'file-medical': 'fa-solid fa-file-medical',
   
   // Gamification
   trophy: 'fa-solid fa-trophy',
@@ -81,18 +89,37 @@ export const VigorLogIcons = {
   
   // System
   loading: 'fa-solid fa-spinner',
+  spinner: 'fa-solid fa-spinner',
   download: 'fa-solid fa-download',
   upload: 'fa-solid fa-upload',
   print: 'fa-solid fa-print',
   rocket: 'fa-solid fa-rocket',
+  check: 'fa-solid fa-check',
+  'check-circle': 'fa-solid fa-circle-check',
+  'exclamation-triangle': 'fa-solid fa-triangle-exclamation',
+  'exclamation-circle': 'fa-solid fa-circle-exclamation',
+  'info-circle': 'fa-solid fa-circle-info',
+  'circle-check': 'fa-solid fa-circle-check',
+  'circle-question': 'fa-solid fa-circle-question',
+  'circle-exclamation': 'fa-solid fa-circle-exclamation',
+  'triangle-exclamation': 'fa-solid fa-triangle-exclamation',
+  shield: 'fa-solid fa-shield-halved',
+  users: 'fa-solid fa-users',
+  cog: 'fa-solid fa-gear',
   
   // Arrows & Navigation
   chevronDown: 'fa-solid fa-chevron-down',
   chevronUp: 'fa-solid fa-chevron-up',
   chevronLeft: 'fa-solid fa-chevron-left',
   chevronRight: 'fa-solid fa-chevron-right',
+  'chevron-right': 'fa-solid fa-chevron-right',
   arrowLeft: 'fa-solid fa-arrow-left',
   arrowRight: 'fa-solid fa-arrow-right',
+  'arrow-left': 'fa-solid fa-arrow-left',
+  'arrow-right': 'fa-solid fa-arrow-right',
+  'arrow-up': 'fa-solid fa-arrow-up',
+  'arrow-down': 'fa-solid fa-arrow-down',
+  minus: 'fa-solid fa-minus',
   
   // Body Parts for Pain Location
   head: 'fa-solid fa-head-side-headphones',

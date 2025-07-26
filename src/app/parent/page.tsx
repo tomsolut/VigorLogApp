@@ -5,105 +5,147 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Icon } from '@/components/ui/icon';
+import { Icon, type IconName } from '@/components/ui/icon';
 import { useAuthStore } from '@/stores/auth';
 import { storage } from '@/lib/storage';
-import type { CheckIn, HealthMetric } from '@/types';
+import { logger } from '@/lib/logger';
+import type { CheckIn, HealthMetric, Parent, Athlete, DailyCheckin } from '@/types';
 
 interface Child {
   id: string;
   name: string;
   role: string;
   dateOfBirth?: string;
-  lastCheckIn?: CheckIn;
+  lastCheckIn?: DailyCheckin;
   consentStatus?: 'pending' | 'approved' | 'parent-only';
 }
 
 export default function ParentDashboard() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const [user, setUser] = useState<Parent | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [alerts, setAlerts] = useState<string[]>([]);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'parent') {
-      router.push('/');
-    } else {
+    // Use getState directly like Coach Dashboard
+    const checkAuth = setTimeout(() => {
+      const currentUser = useAuthStore.getState().currentUser;
+      logger.info('ParentDashboard', 'Auth check', { currentUser });
+      
+      if (!currentUser) {
+        logger.warn('ParentDashboard', 'No user found, redirecting to home');
+        router.push('/');
+        return;
+      }
+      
+      if (currentUser.role !== 'parent') {
+        logger.warn('ParentDashboard', 'User is not a parent', { role: currentUser.role });
+        router.push('/');
+        return;
+      }
+
+      setUser(currentUser as Parent);
+      setAuthChecked(true);
       loadChildrenData();
-    }
-  }, [isAuthenticated, user, router]);
+    }, 100);
+
+    return () => clearTimeout(checkAuth);
+  }, [router]);
 
   const loadChildrenData = () => {
-    // Mock data - in production this would come from an API
-    const mockChildren: Child[] = [
-      {
-        id: 'athlete-1',
-        name: 'Max Mustermann',
-        role: 'athlete',
-        dateOfBirth: '2008-03-15',
-        consentStatus: 'approved',
-        lastCheckIn: storage.get(`checkin_athlete-1_${new Date().toISOString().split('T')[0]}`)
-      },
-      {
-        id: 'athlete-2',
-        name: 'Sophie Müller',
-        role: 'athlete',
-        dateOfBirth: '2009-07-22',
-        consentStatus: 'approved',
-        lastCheckIn: storage.get(`checkin_athlete-2_${new Date().toISOString().split('T')[0]}`)
-      }
-    ];
+    try {
+      setLoading(true);
+      const currentUser = useAuthStore.getState().currentUser;
+      if (!currentUser || currentUser.role !== 'parent') return;
+      
+      const parent = currentUser as Parent;
+      logger.info('ParentDashboard', 'Loading children data', { parentId: parent.id, childrenIds: parent.childrenIds });
+      
+      // Get actual children from storage
+      const allUsers = storage.getUsers();
+      const childrenData: Child[] = parent.childrenIds.map(childId => {
+        const child = allUsers.find(u => u.id === childId && u.role === 'athlete') as Athlete;
+        if (!child) return null;
+        
+        // Get today's check-in
+        const todayCheckins = storage.getCheckins().filter(c => 
+          c.athleteId === child.id && 
+          c.date === new Date().toISOString().split('T')[0]
+        );
+        
+        return {
+          id: child.id,
+          name: `${child.firstName} ${child.lastName}`,
+          role: 'athlete',
+          dateOfBirth: child.birthDate,
+          consentStatus: 'approved' as const,
+          lastCheckIn: todayCheckins[0]
+        };
+      }).filter(Boolean) as Child[];
 
-    // Check for alerts
-    const newAlerts: string[] = [];
-    mockChildren.forEach(child => {
-      if (child.lastCheckIn) {
-        // Check pain level
-        if (child.lastCheckIn.painLevel > 7) {
-          newAlerts.push(`${child.name} meldet hohe Schmerzen (${child.lastCheckIn.painLevel}/10)`);
+      // Check for alerts
+      const newAlerts: string[] = [];
+      childrenData.forEach(child => {
+        if (child.lastCheckIn) {
+          // Check pain level
+          if (child.lastCheckIn.painLevel > 7) {
+            newAlerts.push(`${child.name} meldet hohe Schmerzen (${child.lastCheckIn.painLevel}/10)`);
+          }
+          // Check fatigue
+          if (child.lastCheckIn.fatigueLevel > 7) {
+            newAlerts.push(`${child.name} ist sehr müde (${child.lastCheckIn.fatigueLevel}/10)`);
+          }
+          // Check mood
+          if (child.lastCheckIn.moodRating < 4) {
+            newAlerts.push(`${child.name} hat niedrige Stimmung (${child.lastCheckIn.moodRating}/10)`);
+          }
+        } else {
+          newAlerts.push(`${child.name} hat heute noch keinen Check-in durchgeführt`);
         }
-        // Check fatigue
-        if (child.lastCheckIn.fatigueLevel > 7) {
-          newAlerts.push(`${child.name} ist sehr müde (${child.lastCheckIn.fatigueLevel}/10)`);
-        }
-        // Check mood
-        if (child.lastCheckIn.mood < 4) {
-          newAlerts.push(`${child.name} hat niedrige Stimmung (${child.lastCheckIn.mood}/10)`);
-        }
-      } else {
-        newAlerts.push(`${child.name} hat heute noch keinen Check-in durchgeführt`);
-      }
-    });
+      });
 
-    setChildren(mockChildren);
-    setAlerts(newAlerts);
-    setLoading(false);
+      setChildren(childrenData);
+      setAlerts(newAlerts);
+      logger.info('ParentDashboard', 'Children data loaded', { 
+        childrenCount: childrenData.length,
+        alertsCount: newAlerts.length 
+      });
+    } catch (error) {
+      logger.error('ParentDashboard', 'Error loading children data', { error });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getMetricColor = (metric: string, value: number): string => {
+  // Etablierte Farblogik aus Athlete Dashboard
+  const getMetricValueColor = (metric: string, value: number): string => {
+    // Metriken wo niedrige Werte gut sind
     const negativeMetrics = ['painLevel', 'pain', 'fatigueLevel', 'fatigue', 'stressLevel', 'stress', 'muscleSoreness'];
     
     if (negativeMetrics.includes(metric)) {
+      // Niedrig = gut (grün), Hoch = schlecht (rot)
       if (value <= 3) return 'text-green-600';
       if (value <= 6) return 'text-orange-600';
       return 'text-red-600';
     } else {
+      // Hoch = gut (grün), Niedrig = schlecht (rot) - für Schlaf und Stimmung
       if (value >= 7) return 'text-green-600';
       if (value >= 4) return 'text-orange-600';
       return 'text-red-600';
     }
   };
 
-  const getOverallHealthStatus = (checkIn: CheckIn | undefined): { status: string; color: string; icon: string } => {
+  const getOverallHealthStatus = (checkIn: DailyCheckin | undefined): { status: string; color: string; icon: IconName } => {
     if (!checkIn) {
       return { status: 'Kein Check-in', color: 'text-muted-foreground', icon: 'circle-question' };
     }
 
     const metrics = [
-      { name: 'sleep', value: checkIn.sleepHours, isPositive: true },
-      { name: 'mood', value: checkIn.mood, isPositive: true },
+      { name: 'sleep', value: checkIn.sleepQuality, isPositive: true },
+      { name: 'mood', value: checkIn.moodRating, isPositive: true },
       { name: 'painLevel', value: checkIn.painLevel, isPositive: false },
       { name: 'fatigueLevel', value: checkIn.fatigueLevel, isPositive: false },
       { name: 'stressLevel', value: checkIn.stressLevel, isPositive: false },
@@ -122,36 +164,53 @@ export default function ParentDashboard() {
     });
 
     if (score >= 10) {
-      return { status: 'Sehr gut', color: 'text-green-600', icon: 'circle-check' };
+      return { status: 'Sehr gut', color: 'text-green-600', icon: 'circle-check' as IconName };
     } else if (score >= 6) {
-      return { status: 'Gut', color: 'text-orange-600', icon: 'circle-exclamation' };
+      return { status: 'Gut', color: 'text-orange-600', icon: 'circle-exclamation' as IconName };
     } else {
-      return { status: 'Aufmerksamkeit nötig', color: 'text-red-600', icon: 'triangle-exclamation' };
+      return { status: 'Aufmerksamkeit nötig', color: 'text-red-600', icon: 'triangle-exclamation' as IconName };
     }
   };
 
-  if (loading) {
+  // Show loading while checking auth
+  if (!authChecked || loading) {
     return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 p-4 flex items-center justify-center">
         <div className="text-center">
           <Icon name="spinner" className="text-4xl text-primary animate-spin mb-4" />
-          <p className="text-foreground">Lade Kinderdaten...</p>
+          <p className="text-foreground">
+            {!authChecked ? 'Authentifizierung wird überprüft...' : 'Lade Kinderdaten...'}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Eltern-Dashboard
-          </h1>
-          <p className="text-muted-foreground">
-            Überwachen Sie die Gesundheit Ihrer Kinder
-          </p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Eltern-Dashboard
+            </h1>
+            <p className="text-muted-foreground">
+              Willkommen zurück, {user?.firstName}! Überwachen Sie die Gesundheit Ihrer Kinder
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <Button
+              onClick={() => {
+                useAuthStore.getState().logout();
+                router.push('/');
+              }}
+              variant="outline"
+            >
+              <Icon name="logout" className="mr-2" />
+              Abmelden
+            </Button>
+          </div>
         </div>
 
         {/* Alerts */}
@@ -240,12 +299,12 @@ export default function ParentDashboard() {
 
                 const checkIn = child.lastCheckIn;
                 const metrics: { label: string; value: number; metric: string; unit?: string }[] = [
-                  { label: 'Schlaf', value: checkIn.sleepHours, metric: 'sleep', unit: 'Stunden' },
-                  { label: 'Stimmung', value: checkIn.mood, metric: 'mood' },
+                  { label: 'Schlafqualität', value: checkIn.sleepQuality, metric: 'sleep' },
+                  { label: 'Stimmung', value: checkIn.moodRating, metric: 'mood' },
                   { label: 'Schmerzniveau', value: checkIn.painLevel, metric: 'painLevel' },
                   { label: 'Müdigkeit', value: checkIn.fatigueLevel, metric: 'fatigueLevel' },
                   { label: 'Stress', value: checkIn.stressLevel, metric: 'stressLevel' },
-                  { label: 'Muskelkater', value: checkIn.muscleSoreness || 0, metric: 'muscleSoreness' }
+                  { label: 'Muskelkater', value: checkIn.muscleSoreness, metric: 'muscleSoreness' }
                 ];
 
                 return (
@@ -253,8 +312,8 @@ export default function ParentDashboard() {
                     {metrics.map((item, index) => (
                       <div key={index} className="p-4 border rounded-lg">
                         <p className="text-sm text-muted-foreground mb-1">{item.label}</p>
-                        <p className={`text-2xl font-bold ${getMetricColor(item.metric, item.value)}`}>
-                          {item.value}{item.unit ? ` ${item.unit}` : '/10'}
+                        <p className={`text-2xl font-bold ${getMetricValueColor(item.metric, item.value)}`}>
+                          {item.value}/10
                         </p>
                       </div>
                     ))}
