@@ -226,23 +226,23 @@ export function DualConsentDemo() {
             <div>
               <h4 className="font-semibold mb-2">Features implementiert:</h4>
               <ul className="space-y-1 text-sm text-gray-600">
-                <li>✅ Altersberechnung basierend auf Geburtsdatum</li>
-                <li>✅ Automatische Dual-Consent-Erkennung für &lt;16 Jahre</li>
-                <li>✅ Parent-Child Account-Verknüpfung</li>
-                <li>✅ GDPR-konforme Consent-Texte</li>
-                <li>✅ Multi-Step Registrierungsformular</li>
-                <li>✅ Validation mit Zod Schema</li>
+                <li><Icon name="check" className="inline mr-1 text-green-600" size="xs" />Altersberechnung basierend auf Geburtsdatum</li>
+                <li><Icon name="check" className="inline mr-1 text-green-600" size="xs" />Automatische Dual-Consent-Erkennung für &lt;16 Jahre</li>
+                <li><Icon name="check" className="inline mr-1 text-green-600" size="xs" />Parent-Child Account-Verknüpfung</li>
+                <li><Icon name="check" className="inline mr-1 text-green-600" size="xs" />GDPR-konforme Consent-Texte</li>
+                <li><Icon name="check" className="inline mr-1 text-green-600" size="xs" />Multi-Step Registrierungsformular</li>
+                <li><Icon name="check" className="inline mr-1 text-green-600" size="xs" />Validation mit Zod Schema</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-2">Nächste Schritte:</h4>
               <ul className="space-y-1 text-sm text-gray-600">
-                <li>🔄 E-Mail-Benachrichtigungen für Parents</li>
-                <li>🔄 Consent-Widerruf Mechanismus</li>
-                <li>🔄 Dokumentation der Consent-Historie</li>
-                <li>🔄 Admin-Dashboard für Compliance-Monitoring</li>
-                <li>🔄 Export von Consent-Records für Audits</li>
-                <li>🔄 Integration mit E-Mail-Service (SendGrid/Resend)</li>
+                <li><Icon name="loading" className="inline mr-1 text-blue-600 animate-spin" size="xs" />E-Mail-Benachrichtigungen für Parents</li>
+                <li><Icon name="loading" className="inline mr-1 text-blue-600 animate-spin" size="xs" />Consent-Widerruf Mechanismus</li>
+                <li><Icon name="loading" className="inline mr-1 text-blue-600 animate-spin" size="xs" />Dokumentation der Consent-Historie</li>
+                <li><Icon name="loading" className="inline mr-1 text-blue-600 animate-spin" size="xs" />Admin-Dashboard für Compliance-Monitoring</li>
+                <li><Icon name="loading" className="inline mr-1 text-blue-600 animate-spin" size="xs" />Export von Consent-Records für Audits</li>
+                <li><Icon name="loading" className="inline mr-1 text-blue-600 animate-spin" size="xs" />Integration mit E-Mail-Service (SendGrid/Resend)</li>
               </ul>
             </div>
           </div>

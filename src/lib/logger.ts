@@ -56,7 +56,7 @@ class Logger {
     }
 
     // Speichere kritische Logs im localStorage
-    if (level === 'error' || level === 'warn') {
+    if ((level === 'error' || level === 'warn') && typeof window !== 'undefined' && window.localStorage) {
       try {
         const storedLogs = localStorage.getItem('vigorlog_debug_logs');
         const logs = storedLogs ? JSON.parse(storedLogs) : [];
@@ -101,10 +101,12 @@ class Logger {
   // Lösche alle Logs
   clearLogs() {
     this.logs = [];
-    try {
-      localStorage.removeItem('vigorlog_debug_logs');
-    } catch (e) {
-      console.error('Failed to clear stored logs:', e);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        localStorage.removeItem('vigorlog_debug_logs');
+      } catch (e) {
+        console.error('Failed to clear stored logs:', e);
+      }
     }
   }
 
@@ -156,6 +158,6 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
     clearLogs: () => logger.clearLogs()
   };
   
-  console.log('%c🔍 VigorLog Debug Mode Active', 'color: #39FF14; font-weight: bold;');
+  console.log('%c[DEBUG] VigorLog Debug Mode Active', 'color: #39FF14; font-weight: bold;');
   console.log('Use window.vigorlogDebug to access debug tools');
 }

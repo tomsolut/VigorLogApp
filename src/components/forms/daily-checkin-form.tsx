@@ -47,8 +47,8 @@ const healthMetrics: HealthMetric[] = [
     label: 'Müdigkeit',
     icon: 'fatigue',
     color: 'text-orange-600',
-    lowLabel: 'Sehr müde',
-    highLabel: 'Sehr wach',
+    lowLabel: 'Sehr wach',
+    highLabel: 'Sehr müde',
     description: 'Wie müde fühlst du dich gerade?'
   },
   {
@@ -89,29 +89,29 @@ const healthMetrics: HealthMetric[] = [
   }
 ];
 
-// Körperteile für Schmerzauswahl
+// Körperteile für Schmerzauswahl mit Icons
 const bodyParts = [
-  { id: 'head', label: 'Kopf', icon: '🧠' },
-  { id: 'neck', label: 'Nacken', icon: '🦴' },
-  { id: 'shoulder-left', label: 'Schulter links', icon: '💪' },
-  { id: 'shoulder-right', label: 'Schulter rechts', icon: '💪' },
-  { id: 'arm-left', label: 'Arm links', icon: '🦾' },
-  { id: 'arm-right', label: 'Arm rechts', icon: '🦾' },
-  { id: 'chest', label: 'Brust', icon: '🫁' },
-  { id: 'back-upper', label: 'Oberer Rücken', icon: '🦴' },
-  { id: 'back-lower', label: 'Unterer Rücken', icon: '🦴' },
-  { id: 'abdomen', label: 'Bauch', icon: '🫃' },
-  { id: 'hip', label: 'Hüfte', icon: '🦴' },
-  { id: 'thigh-left', label: 'Oberschenkel links', icon: '🦵' },
-  { id: 'thigh-right', label: 'Oberschenkel rechts', icon: '🦵' },
-  { id: 'knee-left', label: 'Knie links', icon: '🦵' },
-  { id: 'knee-right', label: 'Knie rechts', icon: '🦵' },
-  { id: 'calf-left', label: 'Wade links', icon: '🦵' },
-  { id: 'calf-right', label: 'Wade rechts', icon: '🦵' },
-  { id: 'ankle-left', label: 'Knöchel links', icon: '🦶' },
-  { id: 'ankle-right', label: 'Knöchel rechts', icon: '🦶' },
-  { id: 'foot-left', label: 'Fuß links', icon: '🦶' },
-  { id: 'foot-right', label: 'Fuß rechts', icon: '🦶' },
+  { id: 'head', label: 'Kopf', icon: 'head' as const, flip: false },
+  { id: 'neck', label: 'Nacken', icon: 'neck' as const, flip: false },
+  { id: 'shoulder-left', label: 'Schulter links', icon: 'shoulder' as const, flip: true },
+  { id: 'shoulder-right', label: 'Schulter rechts', icon: 'shoulder' as const, flip: false },
+  { id: 'arm-left', label: 'Arm links', icon: 'arm' as const, flip: true },
+  { id: 'arm-right', label: 'Arm rechts', icon: 'arm' as const, flip: false },
+  { id: 'chest', label: 'Brust', icon: 'chest' as const, flip: false },
+  { id: 'back-upper', label: 'Oberer Rücken', icon: 'back' as const, flip: false },
+  { id: 'back-lower', label: 'Unterer Rücken', icon: 'back' as const, flip: false },
+  { id: 'abdomen', label: 'Bauch', icon: 'abdomen' as const, flip: false },
+  { id: 'hip', label: 'Hüfte', icon: 'hip' as const, flip: false },
+  { id: 'thigh-left', label: 'Oberschenkel links', icon: 'thigh' as const, flip: true },
+  { id: 'thigh-right', label: 'Oberschenkel rechts', icon: 'thigh' as const, flip: false },
+  { id: 'knee-left', label: 'Knie links', icon: 'knee' as const, flip: false },
+  { id: 'knee-right', label: 'Knie rechts', icon: 'knee' as const, flip: false },
+  { id: 'calf-left', label: 'Wade links', icon: 'calf' as const, flip: false },
+  { id: 'calf-right', label: 'Wade rechts', icon: 'calf' as const, flip: true },
+  { id: 'ankle-left', label: 'Knöchel links', icon: 'ankle' as const, flip: true },
+  { id: 'ankle-right', label: 'Knöchel rechts', icon: 'ankle' as const, flip: false },
+  { id: 'foot-left', label: 'Fuß links', icon: 'foot' as const, flip: true },
+  { id: 'foot-right', label: 'Fuß rechts', icon: 'foot' as const, flip: false },
 ];
 
 interface DailyCheckinFormProps {
@@ -422,7 +422,7 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
                         aria-label={`${bodyPart.label} ${selectedBodyParts.includes(bodyPart.id) ? 'abwählen' : 'auswählen'}`}
                         aria-pressed={selectedBodyParts.includes(bodyPart.id)}
                       >
-                        <span className="text-lg">{bodyPart.icon}</span>
+                        <Icon name={bodyPart.icon} className="text-lg mb-1" flip={bodyPart.flip ? 'horizontal' : false} />
                         <span className="text-xs leading-tight text-center">
                           {bodyPart.label}
                         </span>
@@ -440,8 +440,9 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
                         {selectedBodyParts.map((partId) => {
                           const bodyPart = bodyParts.find(p => p.id === partId);
                           return (
-                            <Badge key={partId} variant="destructive" className="text-xs">
-                              {bodyPart?.icon} {bodyPart?.label}
+                            <Badge key={partId} variant="destructive" className="text-xs flex items-center gap-1">
+                              {bodyPart && <Icon name={bodyPart.icon} size="xs" flip={bodyPart.flip ? 'horizontal' : false} />}
+                              {bodyPart?.label}
                             </Badge>
                           );
                         })}

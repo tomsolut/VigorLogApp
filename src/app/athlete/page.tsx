@@ -42,6 +42,17 @@ export default function AthleteDashboard() {
     try {
       logger.debug('AthleteDashboard', 'Loading athlete data', { userId: user.id });
       
+      // Für Sophie (demo-athlete-2): Entferne heutige Check-ins beim Dashboard-Aufruf
+      if (user.id === 'demo-athlete-2') {
+        const todayString = getTodayString();
+        const allCheckins = storage.getCheckins();
+        const filteredCheckins = allCheckins.filter(c => 
+          !(c.athleteId === 'demo-athlete-2' && c.date === todayString)
+        );
+        storage.updateCheckins(filteredCheckins);
+        logger.info('AthleteDashboard', 'Removed today\'s check-in for Sophie demo', { date: todayString });
+      }
+      
       // Lade Daten
       const checkins = storage.getCheckinsByAthleteId(user.id);
       logger.debug('AthleteDashboard', 'Checkins loaded', { count: checkins.length });
@@ -298,8 +309,8 @@ export default function AthleteDashboard() {
                     className="btn-cyber w-full mb-3"
                     aria-label="Quick Check-in starten - optimiert für unter 30 Sekunden"
                   >
-                    <Icon name="zap" className="mr-2" />
-                    ⚡ Quick Check-in (30s)
+                    <Icon name="bolt" className="mr-2" />
+                    Quick Check-in (30s)
                   </button>
                   <button
                     onClick={() => {
@@ -310,7 +321,7 @@ export default function AthleteDashboard() {
                     aria-label="Detailliertes Check-in starten - alle Optionen verfügbar"
                   >
                     <Icon name="edit" className="mr-2" />
-                    📝 Detailed Check-in
+                    Detailed Check-in
                   </button>
                 </div>
                 <p className="text-sm text-foreground/80">
@@ -321,8 +332,8 @@ export default function AthleteDashboard() {
           ) : (
             <Card className="bg-background/95 backdrop-blur-sm border-primary/30">
               <CardContent className="pt-6 text-center">
-                <Icon name="check" className="text-primary text-3xl mx-auto mb-3 glow-lime" />
-                <h3 className="font-semibold mb-2 text-foreground">✅ Check-in Done!</h3>
+                <Icon name="check-circle" className="text-primary text-3xl mx-auto mb-3 glow-lime" />
+                <h3 className="font-semibold mb-2 text-foreground">Check-in Done!</h3>
                 <p className="text-sm text-foreground/80 mb-3">
                   Heute schon erledigt - gut gemacht!
                 </p>

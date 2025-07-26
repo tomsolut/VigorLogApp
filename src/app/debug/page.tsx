@@ -47,7 +47,7 @@ export default function DebugPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>🔍 VigorLog Debug Console</CardTitle>
+            <CardTitle><i className="fa-solid fa-magnifying-glass mr-2"></i>VigorLog Debug Console</CardTitle>
             <div className="flex gap-2">
               <Button onClick={exportLogs} variant="outline" size="sm">
                 Export Logs

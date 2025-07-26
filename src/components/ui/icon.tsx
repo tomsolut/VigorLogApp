@@ -64,23 +64,27 @@ export const VigorLogIcons = {
   trend: 'fa-solid fa-arrow-trend-up',
   calendar: 'fa-solid fa-calendar-days',
   clock: 'fa-solid fa-clock',
+  bolt: 'fa-solid fa-bolt',
   
   // Communication
   message: 'fa-solid fa-comment',
   email: 'fa-solid fa-envelope',
   phone: 'fa-solid fa-phone',
+  'party-horn': 'fa-solid fa-champagne-glasses',
   
   // Gamification
   trophy: 'fa-solid fa-trophy',
   medal: 'fa-solid fa-medal',
   star: 'fa-solid fa-star',
   fire: 'fa-solid fa-fire-flame-curved',
+  target: 'fa-solid fa-bullseye',
   
   // System
   loading: 'fa-solid fa-spinner',
   download: 'fa-solid fa-download',
   upload: 'fa-solid fa-upload',
   print: 'fa-solid fa-print',
+  rocket: 'fa-solid fa-rocket',
   
   // Arrows & Navigation
   chevronDown: 'fa-solid fa-chevron-down',
@@ -89,6 +93,21 @@ export const VigorLogIcons = {
   chevronRight: 'fa-solid fa-chevron-right',
   arrowLeft: 'fa-solid fa-arrow-left',
   arrowRight: 'fa-solid fa-arrow-right',
+  
+  // Body Parts for Pain Location
+  head: 'fa-solid fa-head-side-headphones',
+  neck: 'fa-solid fa-user',
+  shoulder: 'fa-solid fa-vest',
+  arm: 'fa-solid fa-person-waving',
+  chest: 'fa-solid fa-shirt',
+  back: 'fa-solid fa-spine',
+  abdomen: 'fa-solid fa-stomach',
+  hip: 'fa-solid fa-person-walking',
+  thigh: 'fa-solid fa-person-running',
+  knee: 'fa-solid fa-circle-dot',
+  calf: 'fa-solid fa-socks',
+  ankle: 'fa-solid fa-sneaker',
+  foot: 'fa-solid fa-shoe-prints',
 } as const;
 
 export type IconName = keyof typeof VigorLogIcons;
@@ -100,6 +119,7 @@ interface IconProps {
   spin?: boolean;
   pulse?: boolean;
   fixedWidth?: boolean;
+  flip?: 'horizontal' | 'vertical' | 'both' | false;
 }
 
 const sizeClasses = {
@@ -118,6 +138,7 @@ export function Icon({
   spin = false,
   pulse = false,
   fixedWidth = false,
+  flip = false,
   ...props 
 }: IconProps) {
   const [isClient, setIsClient] = useState(false);
@@ -130,7 +151,10 @@ export function Icon({
   const animationClasses = [
     spin && 'fa-spin',
     pulse && 'fa-pulse',
-    fixedWidth && 'fa-fw'
+    fixedWidth && 'fa-fw',
+    flip === 'horizontal' && 'fa-flip-horizontal',
+    flip === 'vertical' && 'fa-flip-vertical',
+    flip === 'both' && 'fa-flip-both'
   ].filter(Boolean).join(' ');
 
   // Render nothing on server to prevent hydration mismatch

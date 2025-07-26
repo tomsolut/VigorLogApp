@@ -1,7 +1,7 @@
 // VigorLog - LocalStorage Manager mit Verschlüsselung
 // DSGVO-konforme Datenspeicherung für sensitive Gesundheitsdaten
 
-import { LocalStorageData } from '@/types';
+import { LocalStorageData, Alert } from '@/types';
 
 // Einfache Verschlüsselung für localStorage (Version 1)
 // In Produktion sollte eine robustere Lösung verwendet werden
@@ -64,7 +64,10 @@ export class VigorLogStorage {
 
   constructor() {
     this.encryption = new SimpleEncryption();
-    this.initializeStorage();
+    // Only initialize storage on client side
+    if (typeof window !== 'undefined') {
+      this.initializeStorage();
+    }
   }
 
   private initializeStorage(): void {
@@ -89,6 +92,9 @@ export class VigorLogStorage {
 
   private isStorageAvailable(): boolean {
     try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return false;
+      }
       const test = '__vigorlog_test__';
       localStorage.setItem(test, test);
       localStorage.removeItem(test);
@@ -128,7 +134,10 @@ export class VigorLogStorage {
 
   // Haupt-Methoden für Datenzugriff
   public getAllData(): LocalStorageData | null {
-    if (!this.isStorageAvailable()) return null;
+    if (!this.isStorageAvailable()) {
+      // Return default data for SSR
+      return this.getDefaultData();
+    }
 
     try {
       const rawData = localStorage.getItem(this.STORAGE_KEY);
@@ -177,6 +186,14 @@ export class VigorLogStorage {
   public getTeams() {
     const data = this.getAllData();
     return data?.teams || [];
+  }
+  
+  public updateTeams(teams: LocalStorageData['teams']): boolean {
+    const data = this.getAllData();
+    if (!data) return false;
+
+    data.teams = teams;
+    return this.setAllData(data);
   }
 
   public getGoals() {
@@ -378,6 +395,29 @@ export class VigorLogStorage {
       checkinCount: this.getCheckins().length,
       alertCount: this.getAlerts().length,
     };
+  }
+
+  // Additional methods for athlete checkins
+  public getAthleteCheckins(athleteId: string) {
+    const checkins = this.getCheckins();
+    return checkins
+      .filter(checkin => checkin.athleteId === athleteId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  // Update alert method
+  public updateAlert(alert: Alert): boolean {
+    const data = this.getAllData();
+    if (!data) return false;
+
+    const index = data.alerts.findIndex(a => a.id === alert.id);
+    if (index === -1) {
+      data.alerts.push(alert);
+    } else {
+      data.alerts[index] = alert;
+    }
+
+    return this.setAllData(data);
   }
 }
 

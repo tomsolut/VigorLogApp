@@ -20,7 +20,6 @@ interface HealthMetric {
   key: keyof DailyCheckinData;
   label: string;
   icon: 'sleep' | 'fatigue' | 'mood' | 'pain' | 'heart';
-  emoji: string;
   color: string;
   quickPresets: { value: number; label: string; color: string }[];
 }
@@ -30,7 +29,6 @@ const healthMetrics: HealthMetric[] = [
     key: 'sleepQuality',
     label: 'Schlaf',
     icon: 'sleep',
-    emoji: '😴',
     color: 'text-chart-1',
     quickPresets: [
       { value: 3, label: 'Schlecht', color: 'bg-red-500' },
@@ -42,7 +40,6 @@ const healthMetrics: HealthMetric[] = [
     key: 'moodRating',
     label: 'Stimmung',
     icon: 'mood',
-    emoji: '😊',
     color: 'text-chart-4',
     quickPresets: [
       { value: 3, label: 'Mies', color: 'bg-red-500' },
@@ -54,7 +51,6 @@ const healthMetrics: HealthMetric[] = [
     key: 'fatigueLevel',
     label: 'Energie',
     icon: 'fatigue',
-    emoji: '⚡',
     color: 'text-chart-2',
     quickPresets: [
       { value: 8, label: 'Müde', color: 'bg-red-500' },
@@ -66,7 +62,6 @@ const healthMetrics: HealthMetric[] = [
     key: 'painLevel',
     label: 'Schmerzen',
     icon: 'pain',
-    emoji: '🩹',
     color: 'text-chart-5',
     quickPresets: [
       { value: 1, label: 'Keine', color: 'bg-primary' },
@@ -78,7 +73,6 @@ const healthMetrics: HealthMetric[] = [
     key: 'stressLevel',
     label: 'Stress',
     icon: 'heart',
-    emoji: '🧘',
     color: 'text-chart-3',
     quickPresets: [
       { value: 2, label: 'Chill', color: 'bg-primary' },
@@ -203,7 +197,7 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
     return (
       <Card className="max-w-md mx-auto bg-background/95 backdrop-blur-sm border-red-500/30">
         <CardContent className="pt-6 text-center">
-          <Icon name="warning" className="h-8 w-8 text-red-500 mb-2 mx-auto" />
+          <Icon name="triangle-exclamation" className="text-red-500 mb-2 mx-auto" size="2xl" />
           <p className="text-foreground">Quick Check-ins sind nur für Athleten verfügbar.</p>
         </CardContent>
       </Card>
@@ -220,12 +214,21 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Icon name="zap" className="text-primary glow-lime" />
-              <CardTitle className="text-foreground">⚡ Quick Check-in</CardTitle>
+              <Icon name="bolt" className="text-primary glow-lime" />
+              <CardTitle className="text-foreground">Quick Check-in</CardTitle>
             </div>
-            <Badge variant="outline" className="border-primary/30 text-primary">
-              {currentMetric + 1}/{healthMetrics.length}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="border-primary/30 text-primary">
+                {currentMetric + 1}/{healthMetrics.length}
+              </Badge>
+              <button
+                onClick={onCancel}
+                className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+                aria-label="Quick Check-in abbrechen"
+              >
+                <Icon name="cancel" className="text-destructive" />
+              </button>
+            </div>
           </div>
           
           {/* Progress Bar */}
@@ -237,7 +240,7 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
           </div>
           
           <CardDescription className="text-foreground/80 text-center mt-2">
-            Ziel: Under 30 Sekunden 🚀
+            Ziel: Under 30 Sekunden <Icon name="rocket" className="inline ml-1 text-primary" size="xs" />
           </CardDescription>
         </CardHeader>
       </Card>
@@ -245,7 +248,9 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
       {/* Current Metric */}
       <Card className="bg-background/95 backdrop-blur-sm border-primary/20">
         <CardHeader className="text-center pb-4">
-          <div className="text-4xl mb-2">{currentMetricData.emoji}</div>
+          <div className="mb-2">
+            <HealthIcon metric={currentMetricData.icon} className={`${currentMetricData.color} mx-auto`} size="2xl" />
+          </div>
           <CardTitle className="text-foreground text-xl">
             Wie ist dein {currentMetricData.label} heute?
           </CardTitle>
@@ -314,12 +319,12 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
               >
                 {isSubmitting ? (
                   <>
-                    <Icon name="loading" className="mr-2 animate-spin" />
+                    <Icon name="spinner" className="mr-2 animate-spin" />
                     Speichere...
                   </>
                 ) : (
                   <>
-                    <Icon name="check" className="mr-2" />
+                    <Icon name="check-circle" className="mr-2" />
                     Fertig!
                   </>
                 )}
@@ -333,8 +338,8 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
       <Card className="bg-background/95 backdrop-blur-sm border-foreground/10">
         <CardContent className="pt-4">
           <div className="text-center text-foreground/60 text-xs space-y-1">
-            <p>⚡ Shortcuts: Tasten 1-3 für Quick-Select</p>
-            <p>Pfeiltasten: ← → Navigation • Enter: Abschließen</p>
+            <p><Icon name="keyboard" className="inline mr-1" size="xs" /> Shortcuts: Tasten 1-3 für Quick-Select</p>
+            <p>Pfeiltasten: <Icon name="arrow-left" className="inline" size="xs" /> <Icon name="arrow-right" className="inline" size="xs" /> Navigation • Enter: Abschließen</p>
           </div>
         </CardContent>
       </Card>
@@ -344,7 +349,7 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
         <Card className="bg-background/95 backdrop-blur-sm border-red-500/30">
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-red-400">
-              <Icon name="error" className="h-4 w-4" />
+              <Icon name="circle-exclamation" className="text-sm" />
               <span className="text-sm">{submitError}</span>
             </div>
           </CardContent>
@@ -355,12 +360,24 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
       {completionTime > 0 && !isSubmitting && (
         <Card className="bg-background/95 backdrop-blur-sm border-primary/30">
           <CardContent className="pt-4 text-center">
-            <div className="text-3xl mb-2">🎉</div>
+            <div className="mb-2">
+              <Icon name="party-horn" className="text-primary text-3xl mx-auto glow-lime" />
+            </div>
             <div className="text-foreground font-semibold">
               Check-in completed in {completionTime}s!
             </div>
             <div className="text-foreground/80 text-sm mt-1">
-              {completionTime <= 30 ? '🚀 Gen Z Speed achieved!' : '⚡ Try for under 30s next time!'}
+              {completionTime <= 30 ? (
+                <>
+                  <Icon name="rocket" className="inline mr-1" size="xs" />
+                  Gen Z Speed achieved!
+                </>
+              ) : (
+                <>
+                  <Icon name="bolt" className="inline mr-1" size="xs" />
+                  Try for under 30s next time!
+                </>
+              )}
             </div>
           </CardContent>
         </Card>

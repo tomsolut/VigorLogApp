@@ -272,19 +272,41 @@ export const useAuthStore = create<AuthState>()(
             parentalConsentDate: new Date().toISOString(),
             parentalConsentBy: 'demo-parent-1'
           },
+          // Demo Athlete 2 (ohne heutigen Check-in)
+          {
+            id: 'demo-athlete-2',
+            email: 'sophie.demo@vigorlog.com',
+            firstName: 'Sophie',
+            lastName: 'Müller',
+            role: 'athlete',
+            createdAt: new Date().toISOString(),
+            isActive: true,
+            birthDate: '2009-03-22',
+            sport: 'Basketball',
+            teamId: 'team-2',
+            parentIds: [],
+            currentStreak: 0,
+            totalPoints: 180,
+            achievements: [],
+            healthStatus: 'unknown',
+            needsParentalConsent: true,
+            hasParentalConsent: false,
+            parentalConsentDate: undefined,
+            parentalConsentBy: undefined
+          },
           // Demo Coach
           {
             id: 'demo-coach-1',
             email: 'coach.demo@vigorlog.com',
             firstName: 'Sarah',
-            lastName: 'Coach',
+            lastName: 'Schmidt',
             role: 'coach',
             createdAt: new Date().toISOString(),
             isActive: true,
             licenseNumber: 'TR-2024-001',
             specializations: ['Jugendtraining', 'Konditionstraining'],
-            teamIds: ['demo-team-1'],
-            clubId: 'demo-club-1',
+            teamIds: ['team-1', 'team-2'],
+            clubId: 'club-1',
           },
           // Demo Parent
           {
@@ -344,7 +366,19 @@ export const useAuthStore = create<AuthState>()(
           const users = storage.getUsers();
           logger.debug('AuthStore', 'Available users', { count: users.length });
           
-          const demoUser = users.find(u => u.role === role && u.id.startsWith('demo-'));
+          // Find demo user - either with demo- prefix or the specific IDs from demo-data
+          const demoUser = users.find(u => {
+            if (u.role !== role) return false;
+            
+            // Original demo users
+            if (u.id.startsWith('demo-')) return true;
+            
+            // New demo users from demo-data.ts
+            if (role === 'coach' && (u.id === 'coach-1' || u.id === 'demo-coach-1')) return true;
+            if (role === 'athlete' && ['athlete-1', 'athlete-2', 'athlete-3', 'athlete-4', 'athlete-5', 'demo-athlete-2'].includes(u.id)) return true;
+            
+            return false;
+          });
 
           if (demoUser) {
             set({ 
@@ -358,12 +392,6 @@ export const useAuthStore = create<AuthState>()(
               role: demoUser.role,
               name: `${demoUser.firstName} ${demoUser.lastName}`
             });
-            
-            // Automatische Navigation nach Login
-            setTimeout(() => {
-              logger.info('AuthStore', 'Navigating to dashboard', { role });
-              window.location.href = `/${role}`;
-            }, 100);
           } else {
             logger.error('AuthStore', 'Demo user not found', { role });
             set({ error: `Demo-${role} nicht gefunden` });
@@ -531,6 +559,7 @@ export const useAuthStore = create<AuthState>()(
         currentUser: state.currentUser,
         isAuthenticated: state.isAuthenticated,
       }),
+      skipHydration: true,
     }
   )
 );
@@ -557,6 +586,11 @@ export const useAuth = () => {
     loginAsDemo: store.loginAsDemo,
   };
 };
+
+// Initialize store hydration on client side
+if (typeof window !== 'undefined') {
+  useAuthStore.persist.rehydrate();
+}
 
 // Helper für Permission-Checks
 export const usePermissions = () => {
