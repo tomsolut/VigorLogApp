@@ -15,7 +15,7 @@ interface LogEntry {
 class Logger {
   private logs: LogEntry[] = [];
   private maxLogs = 1000;
-  private isDevelopment = process.env.NODE_ENV === 'development';
+  private isDevelopment = typeof window !== 'undefined' ? window.location.hostname === 'localhost' : process.env.NODE_ENV === 'development';
 
   private log(level: LogLevel, component: string, message: string, data?: any) {
     const entry: LogEntry = {
@@ -150,7 +150,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Debug-Konsole für Entwicklung
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
   (window as any).vigorlogDebug = {
     getLogs: () => logger.getLogs(),
     getErrors: () => logger.getLogs('error'),
