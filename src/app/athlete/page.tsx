@@ -42,11 +42,14 @@ export default function AthleteDashboard() {
   const [recentCheckins, setRecentCheckins] = useState<DailyCheckin[]>([]);
   const [showCheckinForm, setShowCheckinForm] = useState(false);
   const [checkinMode, setCheckinMode] = useState<'quick' | 'detailed'>('quick'); // Gen Z default: quick
+  const [showCheckinModal, setShowCheckinModal] = useState(false); // Modal für Check-in-Auswahl
   const [weeklyAverage, setWeeklyAverage] = useState({
-    sleep: 0,
-    mood: 0,
-    pain: 0,
-    stress: 0
+    sleep: { value: 0, hasData: false },
+    mood: { value: 0, hasData: false },
+    pain: { value: 0, hasData: false },
+    stress: { value: 0, hasData: false },
+    fatigue: { value: 0, hasData: false },
+    muscleSoreness: { value: 0, hasData: false }
   });
 
   useEffect(() => {
@@ -108,11 +111,20 @@ export default function AthleteDashboard() {
 
       // Berechne Wochendurchschnitt
       if (recent.length > 0) {
+        const calculateMetricAverage = (metricName: string, getValue: (c: DailyCheckin) => number) => {
+          const values = recent.map(getValue).filter(v => v !== undefined && v !== null);
+          const hasData = values.length > 0 && values.some(v => v > 0);
+          const value = hasData ? Math.round(values.reduce((sum, v) => sum + v, 0) / values.length) : 0;
+          return { value, hasData };
+        };
+
         const avg = {
-          sleep: Math.round(recent.reduce((sum, c) => sum + c.sleepQuality, 0) / recent.length),
-          mood: Math.round(recent.reduce((sum, c) => sum + c.moodRating, 0) / recent.length),
-          pain: Math.round(recent.reduce((sum, c) => sum + c.painLevel, 0) / recent.length),
-          stress: Math.round(recent.reduce((sum, c) => sum + c.stressLevel, 0) / recent.length)
+          sleep: calculateMetricAverage('sleep', c => c.sleepQuality),
+          mood: calculateMetricAverage('mood', c => c.moodRating),
+          pain: calculateMetricAverage('pain', c => c.painLevel),
+          stress: calculateMetricAverage('stress', c => c.stressLevel),
+          fatigue: calculateMetricAverage('fatigue', c => c.fatigueLevel),
+          muscleSoreness: calculateMetricAverage('muscleSoreness', c => c.muscleSoreness || 0)
         };
         setWeeklyAverage(avg);
         logger.debug('AthleteDashboard', 'Weekly averages calculated', avg);
@@ -191,12 +203,13 @@ export default function AthleteDashboard() {
                   </CardDescription>
                 </div>
               </div>
-              <Link href="/athlete/checkin">
-                <Button className={todayCheckin ? '' : 'animate-pulse'}>
-                  <Icon name={todayCheckin ? 'edit' : 'add'} className="mr-2" />
-                  {todayCheckin ? 'Bearbeiten' : 'Jetzt starten'}
-                </Button>
-              </Link>
+              <Button 
+                onClick={() => setShowCheckinModal(true)}
+                className={todayCheckin ? '' : 'animate-pulse'}
+              >
+                <Icon name={todayCheckin ? 'edit' : 'add'} className="mr-2" />
+                {todayCheckin ? 'Bearbeiten' : 'Jetzt starten'}
+              </Button>
             </div>
           </CardHeader>
         </Card>
@@ -281,28 +294,54 @@ export default function AthleteDashboard() {
                       <HealthIcon metric="sleep" className="text-blue-600" />
                       <span>Schlaf</span>
                     </div>
-                    <div className="font-semibold">{weeklyAverage.sleep}/10</div>
+                    <div className={weeklyAverage.sleep.hasData ? `font-semibold ${getMetricValueColor('sleepQuality', weeklyAverage.sleep.value)}` : 'text-muted-foreground'}>
+                      {weeklyAverage.sleep.hasData ? `${weeklyAverage.sleep.value}/10` : 'Keine Daten'}
+                    </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <HealthIcon metric="mood" className="text-green-600" />
                       <span>Stimmung</span>
                     </div>
-                    <div className="font-semibold">{weeklyAverage.mood}/10</div>
+                    <div className={weeklyAverage.mood.hasData ? `font-semibold ${getMetricValueColor('moodRating', weeklyAverage.mood.value)}` : 'text-muted-foreground'}>
+                      {weeklyAverage.mood.hasData ? `${weeklyAverage.mood.value}/10` : 'Keine Daten'}
+                    </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <HealthIcon metric="pain" className="text-red-600" />
                       <span>Schmerzen</span>
                     </div>
-                    <div className="font-semibold">{weeklyAverage.pain}/10</div>
+                    <div className={weeklyAverage.pain.hasData ? `font-semibold ${getMetricValueColor('painLevel', weeklyAverage.pain.value)}` : 'text-muted-foreground'}>
+                      {weeklyAverage.pain.hasData ? `${weeklyAverage.pain.value}/10` : 'Keine Daten'}
+                    </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <HealthIcon metric="heart" className="text-purple-600" />
                       <span>Stress</span>
                     </div>
-                    <div className="font-semibold">{weeklyAverage.stress}/10</div>
+                    <div className={weeklyAverage.stress.hasData ? `font-semibold ${getMetricValueColor('stressLevel', weeklyAverage.stress.value)}` : 'text-muted-foreground'}>
+                      {weeklyAverage.stress.hasData ? `${weeklyAverage.stress.value}/10` : 'Keine Daten'}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <HealthIcon metric="fatigue" className="text-orange-600" />
+                      <span>Müdigkeit</span>
+                    </div>
+                    <div className={weeklyAverage.fatigue.hasData ? `font-semibold ${getMetricValueColor('fatigueLevel', weeklyAverage.fatigue.value)}` : 'text-muted-foreground'}>
+                      {weeklyAverage.fatigue.hasData ? `${weeklyAverage.fatigue.value}/10` : 'Keine Daten'}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <HealthIcon metric="heart" className="text-red-600" />
+                      <span>Muskelkater</span>
+                    </div>
+                    <div className={weeklyAverage.muscleSoreness.hasData ? `font-semibold ${getMetricValueColor('muscleSoreness', weeklyAverage.muscleSoreness.value)}` : 'text-muted-foreground'}>
+                      {weeklyAverage.muscleSoreness.hasData ? `${weeklyAverage.muscleSoreness.value}/10` : 'Keine Daten'}
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -433,6 +472,69 @@ export default function AthleteDashboard() {
           </Card>
         )}
 
+        {/* Check-in Auswahl Modal */}
+        {showCheckinModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md bg-background/95 backdrop-blur-md border-primary/30">
+              <CardHeader className="text-center pb-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <CardTitle className="text-2xl font-bold text-foreground">
+                      Check-in starten
+                    </CardTitle>
+                    <CardDescription className="text-foreground/80 mt-2">
+                      Wähle deinen Check-in Modus
+                    </CardDescription>
+                  </div>
+                  <button
+                    onClick={() => setShowCheckinModal(false)}
+                    className="p-2 rounded-lg hover:bg-destructive/10 transition-colors"
+                    aria-label="Modal schließen"
+                  >
+                    <Icon name="cancel" className="text-destructive" />
+                  </button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 pb-6">
+                <button
+                  onClick={() => {
+                    setCheckinMode('quick');
+                    setShowCheckinModal(false);
+                    setShowCheckinForm(true);
+                  }}
+                  className="w-full btn-cyber flex flex-col items-center justify-center gap-2 py-6 touch-target"
+                  aria-label="Quick Check-in starten - optimiert für unter 30 Sekunden"
+                >
+                  <Icon name="bolt" className="text-2xl" />
+                  <span className="text-lg font-bold">Quick Check-in</span>
+                  <span className="text-sm opacity-90">Under 30 Sekunden</span>
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setCheckinMode('detailed');
+                    setShowCheckinModal(false);
+                    setShowCheckinForm(true);
+                  }}
+                  className="w-full btn-electric flex flex-col items-center justify-center gap-2 py-6 touch-target"
+                  aria-label="Detailliertes Check-in starten - alle Optionen verfügbar"
+                >
+                  <Icon name="edit" className="text-2xl" />
+                  <span className="text-lg font-bold">Detail Check-in</span>
+                  <span className="text-sm opacity-90">Alle Optionen</span>
+                </button>
+                
+                <div className="text-center pt-2">
+                  <p className="text-sm text-foreground/60">
+                    <Icon name="rocket" className="inline mr-1" size="xs" />
+                    Gen Z Speed oder klassisch - du entscheidest!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Check-in Form Modal */}
         {showCheckinForm && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -455,11 +557,20 @@ export default function AthleteDashboard() {
                     
                     // Neuberechnung der Durchschnittswerte
                     if (recent.length > 0) {
+                      const calculateMetricAverage = (metricName: string, getValue: (c: DailyCheckin) => number) => {
+                        const values = recent.map(getValue).filter(v => v !== undefined && v !== null);
+                        const hasData = values.length > 0 && values.some(v => v > 0);
+                        const value = hasData ? Math.round(values.reduce((sum, v) => sum + v, 0) / values.length) : 0;
+                        return { value, hasData };
+                      };
+
                       const avg = {
-                        sleep: Math.round(recent.reduce((sum, c) => sum + c.sleepQuality, 0) / recent.length),
-                        mood: Math.round(recent.reduce((sum, c) => sum + c.moodRating, 0) / recent.length),
-                        pain: Math.round(recent.reduce((sum, c) => sum + c.painLevel, 0) / recent.length),
-                        stress: Math.round(recent.reduce((sum, c) => sum + c.stressLevel, 0) / recent.length)
+                        sleep: calculateMetricAverage('sleep', c => c.sleepQuality),
+                        mood: calculateMetricAverage('mood', c => c.moodRating),
+                        pain: calculateMetricAverage('pain', c => c.painLevel),
+                        stress: calculateMetricAverage('stress', c => c.stressLevel),
+                        fatigue: calculateMetricAverage('fatigue', c => c.fatigueLevel),
+                        muscleSoreness: calculateMetricAverage('muscleSoreness', c => c.muscleSoreness || 0)
                       };
                       setWeeklyAverage(avg);
                     }
@@ -484,11 +595,20 @@ export default function AthleteDashboard() {
                     
                     // Neuberechnung der Durchschnittswerte
                     if (recent.length > 0) {
+                      const calculateMetricAverage = (metricName: string, getValue: (c: DailyCheckin) => number) => {
+                        const values = recent.map(getValue).filter(v => v !== undefined && v !== null);
+                        const hasData = values.length > 0 && values.some(v => v > 0);
+                        const value = hasData ? Math.round(values.reduce((sum, v) => sum + v, 0) / values.length) : 0;
+                        return { value, hasData };
+                      };
+
                       const avg = {
-                        sleep: Math.round(recent.reduce((sum, c) => sum + c.sleepQuality, 0) / recent.length),
-                        mood: Math.round(recent.reduce((sum, c) => sum + c.moodRating, 0) / recent.length),
-                        pain: Math.round(recent.reduce((sum, c) => sum + c.painLevel, 0) / recent.length),
-                        stress: Math.round(recent.reduce((sum, c) => sum + c.stressLevel, 0) / recent.length)
+                        sleep: calculateMetricAverage('sleep', c => c.sleepQuality),
+                        mood: calculateMetricAverage('mood', c => c.moodRating),
+                        pain: calculateMetricAverage('pain', c => c.painLevel),
+                        stress: calculateMetricAverage('stress', c => c.stressLevel),
+                        fatigue: calculateMetricAverage('fatigue', c => c.fatigueLevel),
+                        muscleSoreness: calculateMetricAverage('muscleSoreness', c => c.muscleSoreness || 0)
                       };
                       setWeeklyAverage(avg);
                     }

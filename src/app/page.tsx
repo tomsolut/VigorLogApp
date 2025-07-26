@@ -253,28 +253,6 @@ export default function Home() {
           </Card>
         )}
 
-        {/* GDPR Dual-Consent Demo */}
-        <Card className="mb-12 bg-background/95 backdrop-blur-sm border-primary/30">
-          <CardHeader>
-            <CardTitle className="text-center flex items-center justify-center gap-2 text-foreground">
-              <Icon name="shield" className="text-primary glow-lime" />
-              GDPR Dual-Consent System
-            </CardTitle>
-            <p className="text-center text-foreground/80">
-              Registrierung für Jugendathleten unter 16 Jahren gemäß DSGVO Art. 8
-            </p>
-          </CardHeader>
-          <CardContent className="text-center">
-            <Link href="/dual-consent-demo">
-              <button className="btn-cyber">
-                <Icon name="shield" className="mr-2" />
-                Dual-Consent Demo starten
-              </button>
-            </Link>
-            <p className="text-xs text-foreground/60 mt-2">Vollständig GDPR-konform • Keine Cookies erforderlich</p>
-          </CardContent>
-        </Card>
-
         {/* User Roles Demo */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="rounded-lg p-6 text-center border border-primary/20 hover:border-primary/40 transition-all group">
@@ -381,7 +359,7 @@ export default function Home() {
         </Card>
 
         {/* Sports Demo */}
-        <Card className="bg-background/95 backdrop-blur-sm border-primary/20">
+        <Card className="mb-12 bg-background/95 backdrop-blur-sm border-primary/20">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
               <Icon name="running" className="text-primary glow-lime" />
@@ -463,6 +441,28 @@ export default function Home() {
                 </span>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* GDPR Dual-Consent Demo */}
+        <Card className="bg-background/95 backdrop-blur-sm border-primary/30">
+          <CardHeader>
+            <CardTitle className="text-center flex items-center justify-center gap-2 text-foreground">
+              <Icon name="shield" className="text-primary glow-lime" />
+              GDPR Dual-Consent System
+            </CardTitle>
+            <p className="text-center text-foreground/80">
+              Registrierung für Jugendathleten unter 16 Jahren gemäß DSGVO Art. 8
+            </p>
+          </CardHeader>
+          <CardContent className="text-center">
+            <Link href="/dual-consent-demo">
+              <button className="btn-cyber">
+                <Icon name="shield" className="mr-2" />
+                Dual-Consent Demo starten
+              </button>
+            </Link>
+            <p className="text-xs text-foreground/60 mt-2">Vollständig GDPR-konform • Keine Cookies erforderlich</p>
           </CardContent>
         </Card>
       </main>

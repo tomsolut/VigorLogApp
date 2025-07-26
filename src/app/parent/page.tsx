@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Icon, type IconName } from '@/components/ui/icon';
+import { Icon, HealthIcon, type IconName } from '@/components/ui/icon';
 import { useAuthStore } from '@/stores/auth';
 import { storage } from '@/lib/storage';
 import { logger } from '@/lib/logger';
@@ -298,24 +298,37 @@ export default function ParentDashboard() {
                 }
 
                 const checkIn = child.lastCheckIn;
-                const metrics: { label: string; value: number; metric: string; unit?: string }[] = [
-                  { label: 'Schlafqualität', value: checkIn.sleepQuality, metric: 'sleep' },
-                  { label: 'Stimmung', value: checkIn.moodRating, metric: 'mood' },
-                  { label: 'Schmerzniveau', value: checkIn.painLevel, metric: 'painLevel' },
-                  { label: 'Müdigkeit', value: checkIn.fatigueLevel, metric: 'fatigueLevel' },
-                  { label: 'Stress', value: checkIn.stressLevel, metric: 'stressLevel' },
-                  { label: 'Muskelkater', value: checkIn.muscleSoreness, metric: 'muscleSoreness' }
+                const metrics: { 
+                  label: string; 
+                  value: number; 
+                  metric: string; 
+                  healthMetric: 'sleep' | 'mood' | 'pain' | 'heart' | 'fatigue'; 
+                  iconColor: string;
+                }[] = [
+                  { label: 'Schlafqualität', value: checkIn.sleepQuality, metric: 'sleep', healthMetric: 'sleep', iconColor: 'text-blue-600' },
+                  { label: 'Stimmung', value: checkIn.moodRating, metric: 'mood', healthMetric: 'mood', iconColor: 'text-green-600' },
+                  { label: 'Schmerzniveau', value: checkIn.painLevel, metric: 'painLevel', healthMetric: 'pain', iconColor: 'text-red-600' },
+                  { label: 'Müdigkeit', value: checkIn.fatigueLevel, metric: 'fatigueLevel', healthMetric: 'fatigue', iconColor: 'text-orange-600' },
+                  { label: 'Stress', value: checkIn.stressLevel, metric: 'stressLevel', healthMetric: 'heart', iconColor: 'text-purple-600' },
+                  { label: 'Muskelkater', value: checkIn.muscleSoreness, metric: 'muscleSoreness', healthMetric: 'heart', iconColor: 'text-red-600' }
                 ];
 
                 return (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
                     {metrics.map((item, index) => (
-                      <div key={index} className="p-4 border rounded-lg">
-                        <p className="text-sm text-muted-foreground mb-1">{item.label}</p>
-                        <p className={`text-2xl font-bold ${getMetricValueColor(item.metric, item.value)}`}>
-                          {item.value}/10
-                        </p>
-                      </div>
+                      <Card key={index}>
+                        <CardContent className="pt-6 text-center">
+                          <HealthIcon 
+                            metric={item.healthMetric} 
+                            className={`${item.iconColor} mx-auto mb-2`} 
+                            size="xl" 
+                          />
+                          <div className={`text-2xl font-bold ${getMetricValueColor(item.metric, item.value)}`}>
+                            {item.value}/10
+                          </div>
+                          <div className="text-sm text-muted-foreground">{item.label}</div>
+                        </CardContent>
+                      </Card>
                     ))}
                     
                     {checkIn.painLocation && checkIn.painLocation.length > 0 && (

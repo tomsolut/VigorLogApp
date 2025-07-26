@@ -130,7 +130,7 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
       if (e.key >= '1' && e.key <= '3') {
         const presetIndex = parseInt(e.key) - 1;
         const metric = healthMetrics[currentMetric];
-        if (metric && metric.quickPresets[presetIndex]) {
+        if (metric && metric.quickPresets && metric.quickPresets[presetIndex]) {
           handleQuickSelect(metric.key, metric.quickPresets[presetIndex].value);
         }
       } else if (e.key === 'ArrowRight' || e.key === ' ') {
@@ -206,6 +206,18 @@ export function QuickCheckinForm({ onSuccess, onCancel, existingCheckin }: Quick
 
   const currentMetricData = healthMetrics[currentMetric];
   const progress = ((currentMetric + 1) / healthMetrics.length) * 100;
+  
+  // Safety check für currentMetricData
+  if (!currentMetricData) {
+    return (
+      <Card className="max-w-md mx-auto bg-background/95 backdrop-blur-sm border-red-500/30">
+        <CardContent className="pt-6 text-center">
+          <Icon name="triangle-exclamation" className="text-red-500 mb-2 mx-auto" size="2xl" />
+          <p className="text-foreground">Ein Fehler ist aufgetreten. Bitte lade die Seite neu.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto space-y-4">

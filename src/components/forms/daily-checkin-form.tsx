@@ -301,20 +301,32 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <Card>
-        <CardHeader className="text-center">
-          <div className="flex justify-center items-center gap-3 mb-2">
-            <Icon name="heart" className="text-red-500" size="2xl" />
-            <CardTitle className="text-2xl">Daily Check-in</CardTitle>
+        <CardHeader className="pb-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1 text-center">
+              <div className="flex justify-center items-center gap-3 mb-2">
+                <Icon name="heart" className="text-red-500" size="2xl" />
+                <CardTitle className="text-2xl">Daily Check-in</CardTitle>
+              </div>
+              <CardDescription>
+                Wie fühlst du dich heute? (Dauert nur 1-2 Minuten)
+              </CardDescription>
+              {existingCheckin && (
+                <Badge variant="outline" className="mx-auto mt-2">
+                  <Icon name="edit" className="w-3 h-3 mr-1" />
+                  Check-in bearbeiten
+                </Badge>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+              aria-label="Daily Check-in abbrechen"
+            >
+              <Icon name="cancel" className="text-destructive" />
+            </button>
           </div>
-          <CardDescription>
-            Wie fühlst du dich heute? (Dauert nur 1-2 Minuten)
-          </CardDescription>
-          {existingCheckin && (
-            <Badge variant="outline" className="mx-auto">
-              <Icon name="edit" className="w-3 h-3 mr-1" />
-              Check-in bearbeiten
-            </Badge>
-          )}
         </CardHeader>
       </Card>
 

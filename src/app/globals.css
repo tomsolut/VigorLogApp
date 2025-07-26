@@ -215,6 +215,12 @@
       oklch(0.65 0.25 240) 100%);
   }
   
+  /* Touch target optimization for mobile (WCAG 2.2) */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
   /* Enhanced focus states for accessibility */
   .focus-enhanced {
     @apply focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary;
