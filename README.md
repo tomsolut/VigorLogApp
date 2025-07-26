@@ -12,7 +12,8 @@ VigorLog is a Progressive Web App designed to prevent injuries in young athletes
 ### Core Functionality
 - **📊 Daily Health Check-ins**: 6 key metrics (sleep, fatigue, muscle soreness, mood, pain, stress)
 - **⚡ Quick Check-in Mode**: Sub-30-second optimized flow for Gen Z attention spans
-- **🎯 Smart Alerts**: Rule-based system for critical health values
+- **🎯 Check-in Selection Modal**: Choose between Quick (30s) or Detail check-in modes
+- **📍 Smart Alerts**: Rule-based system for critical health values
 - **📱 PWA Capabilities**: Works offline, installable on mobile devices
 - **🔒 GDPR Compliant**: Dual-consent system for minors under 16
 
@@ -130,6 +131,7 @@ vigorlog/
 
 ### 4. Performance Optimizations
 - **Quick Check-in**: Streamlined flow under 30 seconds
+- **Modal Selection**: Intuitive check-in mode selection with mobile-optimized touch targets
 - **Lazy Loading**: Components loaded on demand
 - **Offline Support**: PWA with service worker
 - **Optimistic Updates**: Instant UI feedback

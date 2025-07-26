@@ -217,9 +217,9 @@ export default function ParentDashboard() {
         {alerts.length > 0 && (
           <div className="mb-6 space-y-2">
             {alerts.map((alert, index) => (
-              <Alert key={index} className="border-red-600 bg-red-50">
-                <Icon name="triangle-exclamation" className="text-red-600" />
-                <AlertDescription className="text-red-800">{alert}</AlertDescription>
+              <Alert key={index} variant="destructive">
+                <Icon name="triangle-exclamation" />
+                <AlertDescription>{alert}</AlertDescription>
               </Alert>
             ))}
           </div>

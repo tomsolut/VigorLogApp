@@ -127,6 +127,7 @@ export const VigorLogIcons = {
   shoulder: 'fa-solid fa-vest',
   arm: 'fa-solid fa-person-waving',
   chest: 'fa-solid fa-shirt',
+  'shirt-jersey': 'fa-solid fa-shirt',
   back: 'fa-solid fa-spine',
   abdomen: 'fa-solid fa-stomach',
   hip: 'fa-solid fa-person-walking',
