@@ -45,71 +45,81 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* Gen Z Light Theme - Clean & Modern */
+  --background: oklch(0.98 0.01 120); /* Subtle lime-tinted white */
+  --foreground: oklch(0.12 0.02 240); /* Deep blue-black for contrast */
+  --card: oklch(1 0 0); /* Pure white cards */
+  --card-foreground: oklch(0.12 0.02 240);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.12 0.02 240);
+  /* Cyber-lime Primary (#39FF14) */
+  --primary: oklch(0.85 0.25 130); /* Cyber-lime #39FF14 in OKLCH */
+  --primary-foreground: oklch(0.08 0.02 240); /* Dark text on lime */
+  /* Electric-blue Secondary */
+  --secondary: oklch(0.92 0.05 240); /* Light blue-gray */
+  --secondary-foreground: oklch(0.25 0.15 240); /* Electric blue text */
+  --muted: oklch(0.95 0.01 120); /* Subtle lime-tinted gray */
+  --muted-foreground: oklch(0.45 0.02 240); /* Mid-tone blue-gray */
+  /* Electric-blue Accent (#0080FF) */
+  --accent: oklch(0.65 0.25 240); /* Electric-blue #0080FF */
+  --accent-foreground: oklch(0.98 0.01 240); /* Light text on blue */
+  --destructive: oklch(0.65 0.25 15); /* Vibrant red-orange */
+  --border: oklch(0.88 0.02 120); /* Subtle lime-tinted border */
+  --input: oklch(0.96 0.01 120); /* Input background */
+  --ring: oklch(0.85 0.25 130); /* Cyber-lime focus ring */
+  /* Health Metrics Colors - Gen Z Vibrant */
+  --chart-1: oklch(0.85 0.25 130); /* Cyber-lime */
+  --chart-2: oklch(0.65 0.25 240); /* Electric-blue */
+  --chart-3: oklch(0.75 0.20 300); /* Vibrant purple */
+  --chart-4: oklch(0.70 0.22 60); /* Golden yellow */
+  --chart-5: oklch(0.65 0.25 15); /* Coral red */
+  --sidebar: oklch(0.99 0.005 120);
+  --sidebar-foreground: oklch(0.12 0.02 240);
+  --sidebar-primary: oklch(0.85 0.25 130);
+  --sidebar-primary-foreground: oklch(0.08 0.02 240);
+  --sidebar-accent: oklch(0.65 0.25 240);
+  --sidebar-accent-foreground: oklch(0.98 0.01 240);
+  --sidebar-border: oklch(0.88 0.02 120);
+  --sidebar-ring: oklch(0.85 0.25 130);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Gen Z Dark Theme - Bold & Edgy */
+  --background: oklch(0.08 0.02 240); /* Deep blue-black */
+  --foreground: oklch(0.95 0.05 120); /* Bright lime-white */
+  --card: oklch(0.12 0.03 240); /* Slightly lighter blue-black */
+  --card-foreground: oklch(0.95 0.05 120);
+  --popover: oklch(0.10 0.03 240);
+  --popover-foreground: oklch(0.95 0.05 120);
+  /* Cyber-lime Primary - Even more vibrant in dark mode */
+  --primary: oklch(0.90 0.30 130); /* Brighter cyber-lime */
+  --primary-foreground: oklch(0.05 0.02 240); /* Ultra-dark text */
+  /* Electric-blue Secondary */
+  --secondary: oklch(0.20 0.08 240); /* Dark blue-gray */
+  --secondary-foreground: oklch(0.85 0.20 240); /* Bright blue text */
+  --muted: oklch(0.15 0.04 240); /* Dark blue-gray */
+  --muted-foreground: oklch(0.65 0.08 240); /* Mid-bright blue */
+  /* Electric-blue Accent - Glowing effect */
+  --accent: oklch(0.70 0.30 240); /* Brighter electric-blue */
+  --accent-foreground: oklch(0.05 0.02 240); /* Dark text on bright blue */
+  --destructive: oklch(0.70 0.30 15); /* Vibrant neon red */
+  --border: oklch(0.25 0.05 240); /* Subtle blue border */
+  --input: oklch(0.18 0.05 240); /* Input background */
+  --ring: oklch(0.90 0.30 130); /* Bright cyber-lime focus ring */
+  /* Health Metrics Colors - Neon Gen Z */
+  --chart-1: oklch(0.90 0.30 130); /* Bright cyber-lime */
+  --chart-2: oklch(0.70 0.30 240); /* Bright electric-blue */
+  --chart-3: oklch(0.80 0.25 300); /* Neon purple */
+  --chart-4: oklch(0.85 0.28 60); /* Neon yellow */
+  --chart-5: oklch(0.75 0.30 15); /* Neon coral */
+  --sidebar: oklch(0.10 0.03 240);
+  --sidebar-foreground: oklch(0.95 0.05 120);
+  --sidebar-primary: oklch(0.90 0.30 130);
+  --sidebar-primary-foreground: oklch(0.05 0.02 240);
+  --sidebar-accent: oklch(0.70 0.30 240);
+  --sidebar-accent-foreground: oklch(0.05 0.02 240);
+  --sidebar-border: oklch(0.25 0.05 240);
+  --sidebar-ring: oklch(0.90 0.30 130);
 }
 
 @layer base {
@@ -118,5 +128,130 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Gen Z performance optimizations */
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* WCAG 2.2 Accessibility Enhancements */
+  :focus-visible {
+    outline: 2px solid oklch(0.85 0.25 130);
+    outline-offset: 2px;
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --primary: oklch(0.90 0.30 130);
+      --accent: oklch(0.70 0.30 240);
+      --border: oklch(0.30 0.05 240);
+    }
+    
+    .dark {
+      --primary: oklch(0.95 0.35 130);
+      --accent: oklch(0.75 0.35 240);
+      --background: oklch(0.05 0.02 240);
+      --foreground: oklch(0.98 0.01 0);
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    
+    .glow-lime:hover,
+    .glow-blue:hover {
+      box-shadow: none;
+    }
+  }
+}
+
+/* Gen Z UI Enhancement Classes */
+@layer components {
+  /* Cyber-lime glow effect for interactive elements */
+  .glow-lime {
+    box-shadow: 0 0 20px oklch(0.85 0.25 130 / 0.3);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .glow-lime:hover {
+    box-shadow: 0 0 30px oklch(0.85 0.25 130 / 0.5);
+  }
+  
+  /* Electric-blue glow effect */
+  .glow-blue {
+    box-shadow: 0 0 20px oklch(0.65 0.25 240 / 0.3);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .glow-blue:hover {
+    box-shadow: 0 0 30px oklch(0.65 0.25 240 / 0.5);
+  }
+  
+  /* Modern glass morphism effect */
+  .glass-morphism {
+    backdrop-filter: blur(10px);
+    background: oklch(1 0 0 / 0.1);
+    border: 1px solid oklch(1 0 0 / 0.2);
+  }
+  
+  .dark .glass-morphism {
+    background: oklch(0.12 0.03 240 / 0.8);
+    border: 1px solid oklch(0.25 0.05 240 / 0.3);
+  }
+  
+  /* Gen Z gradient backgrounds */
+  .bg-gen-z-gradient {
+    background: linear-gradient(135deg, 
+      oklch(0.85 0.25 130) 0%, 
+      oklch(0.65 0.25 240) 100%);
+  }
+  
+  /* Enhanced focus states for accessibility */
+  .focus-enhanced {
+    @apply focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary;
+    transition: all 0.2s ease;
+  }
+  
+  /* Modern button variants - WCAG 2.2 compliant (44x44pt minimum) */
+  .btn-cyber {
+    @apply bg-primary text-primary-foreground font-semibold px-6 py-4 rounded-lg;
+    @apply hover:bg-primary/90 active:bg-primary/95;
+    @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+    min-height: 44px;
+    min-width: 44px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-electric {
+    @apply bg-accent text-accent-foreground font-semibold px-6 py-4 rounded-lg;
+    @apply hover:bg-accent/90 active:bg-accent/95;
+    @apply focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2;
+    min-height: 44px;
+    min-width: 44px;
+    transition: all 0.2s ease;
+  }
+  
+  /* WCAG 2.2 Touch Target Compliance */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  
+  .touch-target-large {
+    min-height: 48px;
+    min-width: 48px;
+    touch-action: manipulation;
   }
 }

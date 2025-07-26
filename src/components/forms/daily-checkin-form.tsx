@@ -413,12 +413,14 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
                         onClick={() => handleBodyPartToggle(bodyPart.id)}
                         className={`
                           p-3 rounded-lg border-2 text-sm font-medium transition-all
-                          flex flex-col items-center gap-1 hover:shadow-sm
+                          flex flex-col items-center gap-1 hover:shadow-sm touch-target
                           ${selectedBodyParts.includes(bodyPart.id)
                             ? 'border-red-500 bg-red-50 text-red-700'
                             : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                           }
                         `}
+                        aria-label={`${bodyPart.label} ${selectedBodyParts.includes(bodyPart.id) ? 'abwählen' : 'auswählen'}`}
+                        aria-pressed={selectedBodyParts.includes(bodyPart.id)}
                       >
                         <span className="text-lg">{bodyPart.icon}</span>
                         <span className="text-xs leading-tight text-center">
@@ -578,7 +580,8 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 h-12 text-base"
+              className="flex-1 h-12 text-base touch-target-large"
+              aria-label={existingCheckin ? 'Check-in Änderungen speichern' : 'Neues Check-in speichern'}
             >
               {isSubmitting ? (
                 <>
@@ -596,10 +599,11 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
             {onCancel && (
               <Button
                 type="button"
-                variant="outline"
+                variant="outline" 
                 onClick={onCancel}
                 disabled={isSubmitting}
-                className="h-12"
+                className="h-12 touch-target-large"
+                aria-label="Check-in abbrechen und schließen"
               >
                 <Icon name="cancel" className="mr-2" />
                 Abbrechen

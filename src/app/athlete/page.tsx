@@ -9,9 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Icon, HealthIcon } from '@/components/ui/icon';
+import { DailyCheckinForm } from '@/components/forms/daily-checkin-form';
+import { QuickCheckinForm } from '@/components/forms/quick-checkin-form';
 import { useAuth } from '@/stores/auth';
 import { storage } from '@/lib/storage';
 import { getTodayString, formatDate, calculateStreak } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 import type { DailyCheckin } from '@/types';
 
 export default function AthleteDashboard() {
@@ -19,6 +22,8 @@ export default function AthleteDashboard() {
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [recentCheckins, setRecentCheckins] = useState<DailyCheckin[]>([]);
+  const [showCheckinForm, setShowCheckinForm] = useState(false);
+  const [checkinMode, setCheckinMode] = useState<'quick' | 'detailed'>('quick'); // Gen Z default: quick
   const [weeklyAverage, setWeeklyAverage] = useState({
     sleep: 0,
     mood: 0,
@@ -27,27 +32,64 @@ export default function AthleteDashboard() {
   });
 
   useEffect(() => {
-    if (!user || user.role !== 'athlete') return;
+    logger.info('AthleteDashboard', 'Component mounted/updated', { user });
+    
+    if (!user || user.role !== 'athlete') {
+      logger.warn('AthleteDashboard', 'Invalid user or role', { user });
+      return;
+    }
 
-    // Lade Daten
-    const checkins = storage.getCheckinsByAthleteId(user.id);
-    const today = checkins.find(c => c.date === getTodayString());
-    const recent = storage.getRecentCheckins(user.id, 7);
-    const streak = calculateStreak(checkins);
+    try {
+      logger.debug('AthleteDashboard', 'Loading athlete data', { userId: user.id });
+      
+      // Lade Daten
+      const checkins = storage.getCheckinsByAthleteId(user.id);
+      logger.debug('AthleteDashboard', 'Checkins loaded', { count: checkins.length });
+      
+      // Dedupliziere Check-ins basierend auf ID
+      const uniqueCheckins = checkins.filter((checkin, index, self) =>
+        index === self.findIndex((c) => c.id === checkin.id)
+      );
+      
+      if (uniqueCheckins.length !== checkins.length) {
+        logger.warn('AthleteDashboard', 'Duplicate checkins detected and removed', {
+          original: checkins.length,
+          unique: uniqueCheckins.length
+        });
+      }
+      
+      const today = uniqueCheckins.find(c => c.date === getTodayString());
+      let recent = storage.getRecentCheckins(user.id, 7);
+      
+      // Dedupliziere auch die recent checkins
+      recent = recent.filter((checkin, index, self) =>
+        index === self.findIndex((c) => c.id === checkin.id)
+      );
+      const streak = calculateStreak(uniqueCheckins);
 
-    setTodayCheckin(today || null);
-    setRecentCheckins(recent);
-    setCurrentStreak(streak);
+      logger.info('AthleteDashboard', 'Data processed', {
+        todayCheckin: !!today,
+        recentCount: recent.length,
+        streak
+      });
 
-    // Berechne Wochendurchschnitt
-    if (recent.length > 0) {
-      const avg = {
-        sleep: Math.round(recent.reduce((sum, c) => sum + c.sleepQuality, 0) / recent.length),
-        mood: Math.round(recent.reduce((sum, c) => sum + c.moodRating, 0) / recent.length),
-        pain: Math.round(recent.reduce((sum, c) => sum + c.painLevel, 0) / recent.length),
-        stress: Math.round(recent.reduce((sum, c) => sum + c.stressLevel, 0) / recent.length)
-      };
-      setWeeklyAverage(avg);
+      setTodayCheckin(today || null);
+      setRecentCheckins(recent);
+      setCurrentStreak(streak);
+
+      // Berechne Wochendurchschnitt
+      if (recent.length > 0) {
+        const avg = {
+          sleep: Math.round(recent.reduce((sum, c) => sum + c.sleepQuality, 0) / recent.length),
+          mood: Math.round(recent.reduce((sum, c) => sum + c.moodRating, 0) / recent.length),
+          pain: Math.round(recent.reduce((sum, c) => sum + c.painLevel, 0) / recent.length),
+          stress: Math.round(recent.reduce((sum, c) => sum + c.stressLevel, 0) / recent.length)
+        };
+        setWeeklyAverage(avg);
+        logger.debug('AthleteDashboard', 'Weekly averages calculated', avg);
+      }
+    } catch (error) {
+      logger.error('AthleteDashboard', 'Error loading data', { error });
     }
   }, [user]);
 
@@ -244,17 +286,61 @@ export default function AthleteDashboard() {
 
         {/* Actions */}
         <div className="grid md:grid-cols-3 gap-4">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <Link href="/athlete/checkin">
+          {!todayCheckin ? (
+            <Card className="bg-background/95 backdrop-blur-sm border-primary/30 hover:border-primary/50 transition-all">
               <CardContent className="pt-6 text-center">
-                <Icon name="add" className="text-blue-600 text-3xl mx-auto mb-3" />
-                <h3 className="font-semibold mb-2">Neues Check-in</h3>
-                <p className="text-sm text-muted-foreground">
-                  Starte dein tägliches Gesundheits-Check-in
+                <div className="mb-4">
+                  <button
+                    onClick={() => {
+                      setCheckinMode('quick');
+                      setShowCheckinForm(true);
+                    }}
+                    className="btn-cyber w-full mb-3"
+                    aria-label="Quick Check-in starten - optimiert für unter 30 Sekunden"
+                  >
+                    <Icon name="zap" className="mr-2" />
+                    ⚡ Quick Check-in (30s)
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCheckinMode('detailed');
+                      setShowCheckinForm(true);
+                    }}
+                    className="w-full btn-electric"
+                    aria-label="Detailliertes Check-in starten - alle Optionen verfügbar"
+                  >
+                    <Icon name="edit" className="mr-2" />
+                    📝 Detailed Check-in
+                  </button>
+                </div>
+                <p className="text-sm text-foreground/80">
+                  Gen Z Speed oder klassisch - du entscheidest!
                 </p>
               </CardContent>
-            </Link>
-          </Card>
+            </Card>
+          ) : (
+            <Card className="bg-background/95 backdrop-blur-sm border-primary/30">
+              <CardContent className="pt-6 text-center">
+                <Icon name="check" className="text-primary text-3xl mx-auto mb-3 glow-lime" />
+                <h3 className="font-semibold mb-2 text-foreground">✅ Check-in Done!</h3>
+                <p className="text-sm text-foreground/80 mb-3">
+                  Heute schon erledigt - gut gemacht!
+                </p>
+                <Button
+                  onClick={() => {
+                    setCheckinMode('detailed');
+                    setShowCheckinForm(true);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-primary/30 text-primary hover:bg-primary/10"
+                >
+                  <Icon name="edit" className="mr-2 w-4 h-4" />
+                  Bearbeiten
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="hover:shadow-md transition-shadow cursor-pointer opacity-75">
             <CardContent className="pt-6 text-center">
@@ -290,6 +376,73 @@ export default function AthleteDashboard() {
               </p>
             </CardContent>
           </Card>
+        )}
+
+        {/* Check-in Form Modal */}
+        {showCheckinForm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              {checkinMode === 'quick' ? (
+                <QuickCheckinForm
+                  existingCheckin={todayCheckin || undefined}
+                  onSuccess={(checkin) => {
+                    logger.info('AthleteDashboard', 'Quick check-in completed', { checkinId: checkin.id });
+                    setTodayCheckin(checkin);
+                    setShowCheckinForm(false);
+                    
+                    // Aktualisiere Daten manuell statt Reload
+                    const checkins = storage.getCheckinsByAthleteId(user!.id);
+                    const recent = storage.getRecentCheckins(user!.id, 7);
+                    const streak = calculateStreak(checkins);
+                    
+                    setRecentCheckins(recent);
+                    setCurrentStreak(streak);
+                    
+                    // Neuberechnung der Durchschnittswerte
+                    if (recent.length > 0) {
+                      const avg = {
+                        sleep: Math.round(recent.reduce((sum, c) => sum + c.sleepQuality, 0) / recent.length),
+                        mood: Math.round(recent.reduce((sum, c) => sum + c.moodRating, 0) / recent.length),
+                        pain: Math.round(recent.reduce((sum, c) => sum + c.painLevel, 0) / recent.length),
+                        stress: Math.round(recent.reduce((sum, c) => sum + c.stressLevel, 0) / recent.length)
+                      };
+                      setWeeklyAverage(avg);
+                    }
+                  }}
+                  onCancel={() => setShowCheckinForm(false)}
+                />
+              ) : (
+                <DailyCheckinForm
+                  existingCheckin={todayCheckin || undefined}
+                  onSuccess={(checkin) => {
+                    logger.info('AthleteDashboard', 'Daily check-in completed', { checkinId: checkin.id });
+                    setTodayCheckin(checkin);
+                    setShowCheckinForm(false);
+                    
+                    // Aktualisiere Daten manuell statt Reload
+                    const checkins = storage.getCheckinsByAthleteId(user!.id);
+                    const recent = storage.getRecentCheckins(user!.id, 7);
+                    const streak = calculateStreak(checkins);
+                    
+                    setRecentCheckins(recent);
+                    setCurrentStreak(streak);
+                    
+                    // Neuberechnung der Durchschnittswerte
+                    if (recent.length > 0) {
+                      const avg = {
+                        sleep: Math.round(recent.reduce((sum, c) => sum + c.sleepQuality, 0) / recent.length),
+                        mood: Math.round(recent.reduce((sum, c) => sum + c.moodRating, 0) / recent.length),
+                        pain: Math.round(recent.reduce((sum, c) => sum + c.painLevel, 0) / recent.length),
+                        stress: Math.round(recent.reduce((sum, c) => sum + c.stressLevel, 0) / recent.length)
+                      };
+                      setWeeklyAverage(avg);
+                    }
+                  }}
+                  onCancel={() => setShowCheckinForm(false)}
+                />
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>

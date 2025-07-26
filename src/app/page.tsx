@@ -6,6 +6,7 @@ import { Icon, HealthIcon, RoleIcon, SportIcon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/stores/auth';
+import { logger } from '@/lib/logger';
 
 export default function Home() {
   const { user, createDemoUsers, loginAsDemo, logout } = useAuth();
@@ -16,67 +17,71 @@ export default function Home() {
   }, [createDemoUsers]);
 
   const handleDemoLogin = (role: 'athlete' | 'coach' | 'parent' | 'admin') => {
+    logger.info('HomePage', 'Demo login initiated', { role });
     loginAsDemo(role);
   };
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/15">
       <main className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex justify-center items-center gap-3 mb-4">
-            <Icon name="heart" className="text-red-500" size="2xl" />
-            <h1 className="text-4xl font-bold text-gray-800">VigorLog</h1>
+            <Icon name="heart" className="text-primary glow-lime" size="2xl" />
+            <h1 className="text-4xl font-bold text-foreground drop-shadow-lg">VigorLog</h1>
           </div>
-          <p className="text-lg text-gray-600">
-            Athleten-Monitoring für Jugendliche
+          <p className="text-lg text-foreground font-medium">
+            🚀 Athleten-Monitoring für Gen Z
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/95 backdrop-blur-sm border border-primary/30">
+            <span className="text-sm text-foreground/80">Powered by GDPR-konforme Technologie</span>
+          </div>
         </div>
 
         {/* Demo Login Buttons */}
         {!user && (
-          <Card className="mb-12">
+          <Card className="mb-12 bg-background/95 backdrop-blur-sm border-primary/20">
             <CardHeader>
-              <CardTitle className="text-center">
-                Demo-Zugang testen
+              <CardTitle className="text-center text-foreground">
+                ⚡ Demo-Zugang testen
               </CardTitle>
-              <p className="text-center text-muted-foreground">
+              <p className="text-center text-foreground/80">
                 Wähle eine Rolle, um die App zu testen
               </p>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Button 
+                <button 
                   onClick={() => handleDemoLogin('athlete')}
-                  className="h-16 flex-col gap-2"
-                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 border border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-200 glow-lime group focus-visible:ring-2 focus-visible:ring-primary touch-target"
+                  aria-label="Als Athlet anmelden - Demo-Zugang"
                 >
-                  <RoleIcon role="athlete" className="text-blue-600" size="lg" />
-                  <span>Als Athlet</span>
-                </Button>
-                <Button 
+                  <RoleIcon role="athlete" className="text-primary group-hover:scale-110 transition-transform" size="lg" />
+                  <span className="text-foreground font-medium text-sm">Als Athlet</span>
+                </button>
+                <button 
                   onClick={() => handleDemoLogin('coach')}
-                  className="h-16 flex-col gap-2"
-                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 border border-accent/30 hover:bg-accent/10 hover:border-accent/50 transition-all duration-200 glow-blue group focus-visible:ring-2 focus-visible:ring-accent touch-target"
+                  aria-label="Als Coach anmelden - Demo-Zugang"
                 >
-                  <RoleIcon role="coach" className="text-green-600" size="lg" />
-                  <span>Als Coach</span>
-                </Button>
-                <Button 
+                  <RoleIcon role="coach" className="text-accent group-hover:scale-110 transition-transform" size="lg" />
+                  <span className="text-foreground font-medium text-sm">Als Coach</span>
+                </button>
+                <button 
                   onClick={() => handleDemoLogin('parent')}
-                  className="h-16 flex-col gap-2"
-                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 border border-purple-300/30 hover:bg-purple-300/10 hover:border-purple-300/50 transition-all duration-200 group focus-visible:ring-2 focus-visible:ring-purple-300 touch-target"
+                  aria-label="Als Elternteil anmelden - Demo-Zugang"
                 >
-                  <RoleIcon role="parent" className="text-purple-600" size="lg" />
-                  <span>Als Elternteil</span>
-                </Button>
-                <Button 
+                  <RoleIcon role="parent" className="text-purple-300 group-hover:scale-110 transition-transform" size="lg" />
+                  <span className="text-foreground font-medium text-sm">Als Elternteil</span>
+                </button>
+                <button 
                   onClick={() => handleDemoLogin('admin')}
-                  className="h-16 flex-col gap-2"
-                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 border border-orange-300/30 hover:bg-orange-300/10 hover:border-orange-300/50 transition-all duration-200 group focus-visible:ring-2 focus-visible:ring-orange-300 touch-target"
+                  aria-label="Als Administrator anmelden - Demo-Zugang"
                 >
-                  <RoleIcon role="admin" className="text-orange-600" size="lg" />
-                  <span>Als Admin</span>
-                </Button>
+                  <RoleIcon role="admin" className="text-orange-300 group-hover:scale-110 transition-transform" size="lg" />
+                  <span className="text-foreground font-medium text-sm">Als Admin</span>
+                </button>
               </div>
             </CardContent>
           </Card>
@@ -118,137 +123,217 @@ export default function Home() {
         )}
 
         {/* GDPR Dual-Consent Demo */}
-        <Card className="mb-12 border-blue-200 bg-blue-50">
+        <Card className="mb-12 bg-background/95 backdrop-blur-sm border-primary/30">
           <CardHeader>
-            <CardTitle className="text-center flex items-center justify-center gap-2">
-              <Icon name="shield" className="text-blue-600" />
-              GDPR Dual-Consent System
+            <CardTitle className="text-center flex items-center justify-center gap-2 text-foreground">
+              <Icon name="shield" className="text-primary glow-lime" />
+              🛡️ GDPR Dual-Consent System
             </CardTitle>
-            <p className="text-center text-muted-foreground">
+            <p className="text-center text-foreground/80">
               Registrierung für Jugendathleten unter 16 Jahren gemäß DSGVO Art. 8
             </p>
           </CardHeader>
           <CardContent className="text-center">
             <Link href="/dual-consent-demo">
-              <Button className="h-12 px-8">
+              <button className="btn-cyber">
                 <Icon name="shield" className="mr-2" />
                 Dual-Consent Demo starten
-              </Button>
+              </button>
             </Link>
+            <p className="text-xs text-foreground/60 mt-2">Vollständig GDPR-konform • Keine Cookies erforderlich</p>
           </CardContent>
         </Card>
 
         {/* User Roles Demo */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white rounded-lg p-6 shadow-lg text-center">
-            <RoleIcon role="athlete" className="text-blue-600 mb-3" size="2xl" />
-            <h3 className="font-semibold text-gray-800">Athlet</h3>
-            <p className="text-sm text-gray-600">Daily Check-in</p>
+          <div className="rounded-lg p-6 text-center border border-primary/20 hover:border-primary/40 transition-all group">
+            <RoleIcon role="athlete" className="text-primary mb-3 group-hover:scale-110 transition-transform glow-lime" size="2xl" />
+            <h3 className="font-semibold text-foreground mb-1">Athlet</h3>
+            <p className="text-sm text-foreground/70">⚡ Daily Check-in</p>
+            <div className="mt-3 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
+              Gen Z Focus
+            </div>
           </div>
           
-          <div className="bg-white rounded-lg p-6 shadow-lg text-center">
-            <RoleIcon role="coach" className="text-green-600 mb-3" size="2xl" />
-            <h3 className="font-semibold text-gray-800">Coach</h3>
-            <p className="text-sm text-gray-600">Team Dashboard</p>
+          <div className="rounded-lg p-6 text-center border border-accent/20 hover:border-accent/40 transition-all group">
+            <RoleIcon role="coach" className="text-accent mb-3 group-hover:scale-110 transition-transform glow-blue" size="2xl" />
+            <h3 className="font-semibold text-foreground mb-1">Coach</h3>
+            <p className="text-sm text-foreground/70">📊 Team Dashboard</p>
+            <div className="mt-3 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-medium">
+              AI-Powered
+            </div>
           </div>
           
-          <div className="bg-white rounded-lg p-6 shadow-lg text-center">
-            <RoleIcon role="parent" className="text-purple-600 mb-3" size="2xl" />
-            <h3 className="font-semibold text-gray-800">Eltern</h3>
-            <p className="text-sm text-gray-600">Kind-Übersicht</p>
+          <div className="rounded-lg p-6 text-center border border-purple-300/20 hover:border-purple-300/40 transition-all group">
+            <RoleIcon role="parent" className="text-purple-300 mb-3 group-hover:scale-110 transition-transform" size="2xl" />
+            <h3 className="font-semibold text-foreground mb-1">Eltern</h3>
+            <p className="text-sm text-foreground/70">👪 Kind-Übersicht</p>
+            <div className="mt-3 px-3 py-1 rounded-full bg-purple-300/20 text-purple-300 text-xs font-medium">
+              GDPR-Safe
+            </div>
           </div>
           
-          <div className="bg-white rounded-lg p-6 shadow-lg text-center">
-            <RoleIcon role="admin" className="text-orange-600 mb-3" size="2xl" />
-            <h3 className="font-semibold text-gray-800">Admin</h3>
-            <p className="text-sm text-gray-600">Vereinsverwaltung</p>
+          <div className="rounded-lg p-6 text-center border border-orange-300/20 hover:border-orange-300/40 transition-all group">
+            <RoleIcon role="admin" className="text-orange-300 mb-3 group-hover:scale-110 transition-transform" size="2xl" />
+            <h3 className="font-semibold text-foreground mb-1">Admin</h3>
+            <p className="text-sm text-foreground/70">⚙️ Vereinsverwaltung</p>
+            <div className="mt-3 px-3 py-1 rounded-full bg-orange-300/20 text-orange-300 text-xs font-medium">
+              Analytics
+            </div>
           </div>
         </div>
 
         {/* Health Metrics Demo */}
-        <div className="bg-white rounded-lg p-8 shadow-lg mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <Icon name="chart" className="text-blue-600" />
-            Gesundheitsmetriken
-          </h2>
-          
-          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <HealthIcon metric="sleep" className="text-blue-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Schlaf</p>
+        <Card className="mb-12 bg-background/95 backdrop-blur-sm border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
+              <Icon name="chart" className="text-primary glow-lime" />
+              📊 Gesundheitsmetriken
+            </CardTitle>
+            <p className="text-foreground/80">Alle wichtigen Gesundheitsdaten auf einen Blick</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="text-center p-4 border rounded-lg border-chart-1/30 group hover:border-chart-1/50 transition-all">
+                <HealthIcon metric="sleep" className="text-chart-1 mb-2 group-hover:scale-110 transition-transform" size="xl" />
+                <p className="text-sm font-medium text-foreground">Schlaf</p>
+                <div className="mt-2 h-1 bg-chart-1/30 rounded-full">
+                  <div className="h-full w-4/5 bg-chart-1 rounded-full"></div>
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-chart-2/30 group hover:border-chart-2/50 transition-all">
+                <HealthIcon metric="fatigue" className="text-chart-2 mb-2 group-hover:scale-110 transition-transform" size="xl" />
+                <p className="text-sm font-medium text-foreground">Müdigkeit</p>
+                <div className="mt-2 h-1 bg-chart-2/30 rounded-full">
+                  <div className="h-full w-2/5 bg-chart-2 rounded-full"></div>
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-chart-4/30 group hover:border-chart-4/50 transition-all">
+                <HealthIcon metric="mood" className="text-chart-4 mb-2 group-hover:scale-110 transition-transform" size="xl" />
+                <p className="text-sm font-medium text-foreground">Stimmung</p>
+                <div className="mt-2 h-1 bg-chart-4/30 rounded-full">
+                  <div className="h-full w-full bg-chart-4 rounded-full"></div>
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-chart-5/30 group hover:border-chart-5/50 transition-all">
+                <HealthIcon metric="pain" className="text-chart-5 mb-2 group-hover:scale-110 transition-transform" size="xl" />
+                <p className="text-sm font-medium text-foreground">Schmerzen</p>
+                <div className="mt-2 h-1 bg-chart-5/30 rounded-full">
+                  <div className="h-full w-1/5 bg-chart-5 rounded-full"></div>
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-primary/30 group hover:border-primary/50 transition-all">
+                <HealthIcon metric="heart" className="text-primary mb-2 group-hover:scale-110 transition-transform glow-lime" size="xl" />
+                <p className="text-sm font-medium text-foreground">Herz-Rate</p>
+                <div className="mt-2 h-1 bg-primary/30 rounded-full">
+                  <div className="h-full w-3/5 bg-primary rounded-full"></div>
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-chart-3/30 group hover:border-chart-3/50 transition-all">
+                <Icon name="chart" className="text-chart-3 mb-2 group-hover:scale-110 transition-transform" size="xl" />
+                <p className="text-sm font-medium text-foreground">Trends</p>
+                <div className="mt-2 h-1 bg-chart-3/30 rounded-full">
+                  <div className="h-full w-4/5 bg-chart-3 rounded-full animate-pulse"></div>
+                </div>
+              </div>
             </div>
             
-            <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <HealthIcon metric="fatigue" className="text-orange-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Müdigkeit</p>
+            <div className="mt-6 text-center">
+              <p className="text-xs text-foreground/60">Real-time Monitoring • AI-gestützte Insights • Gen Z optimiert</p>
             </div>
-            
-            <div className="text-center p-4 bg-yellow-50 rounded-lg">
-              <HealthIcon metric="mood" className="text-yellow-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Stimmung</p>
-            </div>
-            
-            <div className="text-center p-4 bg-red-50 rounded-lg">
-              <HealthIcon metric="pain" className="text-red-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Schmerzen</p>
-            </div>
-            
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <HealthIcon metric="heart" className="text-green-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Herz-Rate</p>
-            </div>
-            
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <Icon name="chart" className="text-purple-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Trends</p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Sports Demo */}
-        <div className="bg-white rounded-lg p-8 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <Icon name="running" className="text-green-600" />
-            Unterstützte Sportarten
-          </h2>
+        <Card className="bg-background/95 backdrop-blur-sm border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
+              <Icon name="running" className="text-primary glow-lime" />
+              🏆 Unterstützte Sportarten
+            </CardTitle>
+            <p className="text-foreground/80">Speziell optimiert für Jugendathleten verschiedener Disziplinen</p>
+          </CardHeader>
+          <CardContent>
           
-          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
-              <SportIcon sport="fußball" className="text-green-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Fußball</p>
+            <div className="grid md:grid-cols-3 lg:grid-cols-7 gap-4">
+              <div className="text-center p-4 border rounded-lg border-primary/20 hover:border-primary/40 transition-all group">
+                <SportIcon sport="fußball" className="text-primary mb-2 group-hover:scale-110 transition-transform glow-lime" size="xl" />
+                <p className="text-sm font-medium text-foreground">Fußball</p>
+                <div className="mt-2 px-2 py-1 rounded-full bg-primary/20 text-primary text-xs">
+                  #1 Sport
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-chart-2/20 hover:border-chart-2/40 transition-all group">
+                <SportIcon sport="basketball" className="text-chart-2 mb-2 group-hover:scale-110 transition-transform glow-blue" size="xl" />
+                <p className="text-sm font-medium text-foreground">Basketball</p>
+                <div className="mt-2 px-2 py-1 rounded-full bg-chart-2/20 text-chart-2 text-xs">
+                  Gen Z
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-chart-4/20 hover:border-chart-4/40 transition-all group">
+                <SportIcon sport="tennis" className="text-chart-4 mb-2 group-hover:scale-110 transition-transform" size="xl" />
+                <p className="text-sm font-medium text-foreground">Tennis</p>
+                <div className="mt-2 px-2 py-1 rounded-full bg-chart-4/20 text-chart-4 text-xs">
+                  Präzision
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-chart-5/20 hover:border-chart-5/40 transition-all group">
+                <SportIcon sport="baseball" className="text-chart-5 mb-2 group-hover:scale-110 transition-transform" size="xl" />
+                <p className="text-sm font-medium text-foreground">Baseball</p>
+                <div className="mt-2 px-2 py-1 rounded-full bg-chart-5/20 text-chart-5 text-xs">
+                  USA Style
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-orange-300/20 hover:border-orange-300/40 transition-all group">
+                <SportIcon sport="football" className="text-orange-300 mb-2 group-hover:scale-110 transition-transform" size="xl" />
+                <p className="text-sm font-medium text-foreground">Football</p>
+                <div className="mt-2 px-2 py-1 rounded-full bg-orange-300/20 text-orange-300 text-xs">
+                  Power
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-chart-3/20 hover:border-chart-3/40 transition-all group">
+                <SportIcon sport="squash" className="text-chart-3 mb-2 group-hover:scale-110 transition-transform" size="xl" />
+                <p className="text-sm font-medium text-foreground">Squash</p>
+                <div className="mt-2 px-2 py-1 rounded-full bg-chart-3/20 text-chart-3 text-xs">
+                  Speed
+                </div>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg border-accent/20 hover:border-accent/40 transition-all group">
+                <SportIcon sport="schwimmen" className="text-accent mb-2 group-hover:scale-110 transition-transform glow-blue" size="xl" />
+                <p className="text-sm font-medium text-foreground">Schwimmen</p>
+                <div className="mt-2 px-2 py-1 rounded-full bg-accent/20 text-accent text-xs">
+                  Ausdauer
+                </div>
+              </div>
             </div>
             
-            <div className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
-              <SportIcon sport="basketball" className="text-orange-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Basketball</p>
+            <div className="mt-8 text-center">
+              <p className="text-foreground/80 mb-4">Über 50+ Sportarten unterstützt • Speziell für Gen Z entwickelt</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
+                  🔥 Trending
+                </span>
+                <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-sm font-medium">
+                  ⚡ Fast Setup
+                </span>
+                <span className="px-3 py-1 rounded-full bg-chart-3/20 text-chart-3 text-sm font-medium">
+                  🎯 Performance Focus
+                </span>
+              </div>
             </div>
-            
-            <div className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
-              <SportIcon sport="tennis" className="text-yellow-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Tennis</p>
-            </div>
-            
-            <div className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
-              <SportIcon sport="baseball" className="text-red-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Baseball</p>
-            </div>
-            
-            <div className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
-              <SportIcon sport="football" className="text-amber-700 mb-2" size="xl" />
-              <p className="text-sm font-medium">Football</p>
-            </div>
-            
-            <div className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
-              <SportIcon sport="squash" className="text-purple-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Squash</p>
-            </div>
-            
-            <div className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
-              <SportIcon sport="schwimmen" className="text-blue-600 mb-2" size="xl" />
-              <p className="text-sm font-medium">Schwimmen</p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

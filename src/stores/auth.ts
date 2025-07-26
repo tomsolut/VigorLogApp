@@ -6,6 +6,7 @@ import { persist } from 'zustand/middleware';
 import type { User, UserRole, MinorRegistrationData, ConsentRecord, DualConsentRequest } from '@/types';
 import { storage } from '@/lib/storage';
 import { generateId } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 import { 
   calculateAge, 
   needsParentalConsent, 
@@ -337,18 +338,39 @@ export const useAuthStore = create<AuthState>()(
 
       // Quick Demo Login
       loginAsDemo: (role: UserRole) => {
-        const users = storage.getUsers();
-        const demoUser = users.find(u => u.role === role && u.id.startsWith('demo-'));
+        logger.info('AuthStore', 'Demo login started', { role });
+        
+        try {
+          const users = storage.getUsers();
+          logger.debug('AuthStore', 'Available users', { count: users.length });
+          
+          const demoUser = users.find(u => u.role === role && u.id.startsWith('demo-'));
 
-        if (demoUser) {
-          set({ 
-            currentUser: demoUser, 
-            isAuthenticated: true, 
-            error: null 
-          });
-          console.log(`Demo login as ${role}: ${demoUser.firstName} ${demoUser.lastName}`);
-        } else {
-          set({ error: `Demo-${role} nicht gefunden` });
+          if (demoUser) {
+            set({ 
+              currentUser: demoUser, 
+              isAuthenticated: true, 
+              error: null 
+            });
+            
+            logger.info('AuthStore', 'Demo login successful', {
+              userId: demoUser.id,
+              role: demoUser.role,
+              name: `${demoUser.firstName} ${demoUser.lastName}`
+            });
+            
+            // Automatische Navigation nach Login
+            setTimeout(() => {
+              logger.info('AuthStore', 'Navigating to dashboard', { role });
+              window.location.href = `/${role}`;
+            }, 100);
+          } else {
+            logger.error('AuthStore', 'Demo user not found', { role });
+            set({ error: `Demo-${role} nicht gefunden` });
+          }
+        } catch (error) {
+          logger.error('AuthStore', 'Demo login failed', { error, role });
+          set({ error: 'Login fehlgeschlagen' });
         }
       },
 

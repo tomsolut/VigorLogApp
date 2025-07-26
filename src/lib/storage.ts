@@ -271,10 +271,20 @@ export class VigorLogStorage {
     );
     
     if (existingCheckin) {
-      // Update existing checkin
-      const index = checkins.indexOf(existingCheckin);
-      checkins[index] = checkin;
+      // Update existing checkin - behalte die ursprüngliche ID
+      const index = checkins.findIndex(c => c.id === existingCheckin.id);
+      checkins[index] = {
+        ...checkin,
+        id: existingCheckin.id // Behalte die ursprüngliche ID bei
+      };
     } else {
+      // Stelle sicher, dass die ID eindeutig ist
+      const isDuplicateId = checkins.some(c => c.id === checkin.id);
+      if (isDuplicateId) {
+        console.error('Duplicate checkin ID detected:', checkin.id);
+        // Generiere neue ID wenn Duplikat
+        checkin.id = `${checkin.id}-${Date.now()}`;
+      }
       checkins.push(checkin);
     }
 
