@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/stores/auth';
 
 export default function Home() {
-  const { user, createDemoUsers, loginAsDemo } = useAuth();
+  const { user, createDemoUsers, loginAsDemo, logout } = useAuth();
 
   useEffect(() => {
     // Erstelle Demo-User beim ersten Laden
@@ -107,7 +107,7 @@ export default function Home() {
                       Dashboard
                     </Button>
                   </Link>
-                  <Button variant="outline" onClick={() => window.location.reload()}>
+                  <Button variant="outline" onClick={logout}>
                     <Icon name="logout" className="mr-2" />
                     Abmelden
                   </Button>

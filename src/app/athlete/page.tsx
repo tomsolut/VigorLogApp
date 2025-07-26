@@ -15,7 +15,7 @@ import { getTodayString, formatDate, calculateStreak } from '@/lib/utils';
 import type { DailyCheckin } from '@/types';
 
 export default function AthleteDashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [recentCheckins, setRecentCheckins] = useState<DailyCheckin[]>([]);
@@ -84,6 +84,17 @@ export default function AthleteDashboard() {
                 {currentStreak} Tage Streak
               </Badge>
             )}
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                logout();
+                window.location.href = '/';
+              }}
+              className="flex items-center gap-2"
+            >
+              <Icon name="logout" className="text-gray-600" />
+              Abmelden
+            </Button>
           </div>
         </div>
 

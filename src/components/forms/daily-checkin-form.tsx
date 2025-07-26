@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Icon, HealthIcon, LoadingIcon } from '@/components/ui/icon';
 import { DailyCheckinSchema, type DailyCheckinData } from '@/lib/validations';
@@ -88,6 +89,31 @@ const healthMetrics: HealthMetric[] = [
   }
 ];
 
+// Körperteile für Schmerzauswahl
+const bodyParts = [
+  { id: 'head', label: 'Kopf', icon: '🧠' },
+  { id: 'neck', label: 'Nacken', icon: '🦴' },
+  { id: 'shoulder-left', label: 'Schulter links', icon: '💪' },
+  { id: 'shoulder-right', label: 'Schulter rechts', icon: '💪' },
+  { id: 'arm-left', label: 'Arm links', icon: '🦾' },
+  { id: 'arm-right', label: 'Arm rechts', icon: '🦾' },
+  { id: 'chest', label: 'Brust', icon: '🫁' },
+  { id: 'back-upper', label: 'Oberer Rücken', icon: '🦴' },
+  { id: 'back-lower', label: 'Unterer Rücken', icon: '🦴' },
+  { id: 'abdomen', label: 'Bauch', icon: '🫃' },
+  { id: 'hip', label: 'Hüfte', icon: '🦴' },
+  { id: 'thigh-left', label: 'Oberschenkel links', icon: '🦵' },
+  { id: 'thigh-right', label: 'Oberschenkel rechts', icon: '🦵' },
+  { id: 'knee-left', label: 'Knie links', icon: '🦵' },
+  { id: 'knee-right', label: 'Knie rechts', icon: '🦵' },
+  { id: 'calf-left', label: 'Wade links', icon: '🦵' },
+  { id: 'calf-right', label: 'Wade rechts', icon: '🦵' },
+  { id: 'ankle-left', label: 'Knöchel links', icon: '🦶' },
+  { id: 'ankle-right', label: 'Knöchel rechts', icon: '🦶' },
+  { id: 'foot-left', label: 'Fuß links', icon: '🦶' },
+  { id: 'foot-right', label: 'Fuß rechts', icon: '🦶' },
+];
+
 interface DailyCheckinFormProps {
   onSuccess?: (checkin: DailyCheckin) => void;
   onCancel?: () => void;
@@ -99,6 +125,10 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const [selectedBodyParts, setSelectedBodyParts] = useState<string[]>([]);
+  const [notifyCoach, setNotifyCoach] = useState(false);
+  const [notifyParents, setNotifyParents] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
 
   const form = useForm<DailyCheckinData>({
     resolver: zodResolver(DailyCheckinSchema),
@@ -116,6 +146,38 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
 
   const watchedValues = form.watch();
   const painLevel = form.watch('painLevel');
+
+  // Handler für Körperteil-Auswahl
+  const handleBodyPartToggle = (bodyPartId: string) => {
+    setSelectedBodyParts(prev => {
+      const newSelection = prev.includes(bodyPartId)
+        ? prev.filter(id => id !== bodyPartId)
+        : [...prev, bodyPartId];
+      
+      return newSelection;
+    });
+  };
+
+  // Effect um existierende Pain Location zu laden
+  React.useEffect(() => {
+    if (existingCheckin?.painLocation) {
+      const existingLabels = existingCheckin.painLocation.split(', ');
+      const existingIds = existingLabels
+        .map(label => bodyParts.find(part => part.label === label)?.id)
+        .filter(Boolean) as string[];
+      setSelectedBodyParts(existingIds);
+    }
+  }, [existingCheckin]);
+
+  // Effect um form field zu aktualisieren wenn sich selectedBodyParts ändert
+  React.useEffect(() => {
+    const selectedLabels = selectedBodyParts
+      .map(id => bodyParts.find(part => part.id === id)?.label)
+      .filter(Boolean)
+      .join(', ');
+    
+    form.setValue('painLocation', selectedLabels);
+  }, [selectedBodyParts, form]);
 
   const onSubmit = async (data: DailyCheckinData) => {
     if (!user || user.role !== 'athlete') {
@@ -148,6 +210,29 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
         throw new Error('Fehler beim Speichern des Check-ins');
       }
 
+      // Benachrichtigungen versenden falls gewünscht
+      if (data.painLevel >= 5 && (notifyCoach || notifyParents)) {
+        // Hier würde normalerweise eine Benachrichtigung versendet werden
+        // Für Demo-Zwecke loggen wir nur die Absicht
+        console.log('Schmerzbenachrichtigung würde versendet werden:', {
+          athlete: `${user.firstName} ${user.lastName}`,
+          painLevel: data.painLevel,
+          painLocations: selectedBodyParts.map(id => 
+            bodyParts.find(part => part.id === id)?.label
+          ).join(', '),
+          recipients: {
+            coach: notifyCoach,
+            parents: notifyParents
+          },
+          message: notificationMessage || 'Keine zusätzliche Nachricht'
+        });
+        
+        // Zusätzlicher Alert für den Benutzer
+        setTimeout(() => {
+          alert(`Information wurde an ${notifyCoach && notifyParents ? 'Coach und Eltern' : notifyCoach ? 'Coach' : 'Eltern'} weitergeleitet.`);
+        }, 1000);
+      }
+
       onSuccess?.(checkin);
     } catch (error) {
       console.error('Check-in submission error:', error);
@@ -171,7 +256,26 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
     }
   };
 
-  const getValueDescription = (value: number) => {
+  const getValueDescription = (value: number, metricKey: keyof DailyCheckinData) => {
+    // Für negative Metriken (Schmerzen, Muskelkater, Stress): hohe Werte = schlecht
+    if (metricKey === 'painLevel' || metricKey === 'muscleSoreness' || metricKey === 'stressLevel') {
+      if (value >= 8) return 'Sehr schlecht';
+      if (value >= 6) return 'Schlecht';
+      if (value >= 4) return 'Mittel';
+      if (value >= 2) return 'Gut';
+      return 'Sehr gut';
+    }
+    
+    // Für Müdigkeit: hohe Werte = sehr müde (schlecht)
+    if (metricKey === 'fatigueLevel') {
+      if (value >= 8) return 'Sehr müde';
+      if (value >= 6) return 'Müde';
+      if (value >= 4) return 'Mittel';
+      if (value >= 2) return 'Wach';
+      return 'Sehr wach';
+    }
+    
+    // Für positive Metriken (Schlaf, Stimmung): hohe Werte = gut
     if (value >= 8) return 'Sehr gut';
     if (value >= 6) return 'Gut';
     if (value >= 4) return 'Mittel';
@@ -238,7 +342,7 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
                         {watchedValues[metric.key]}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {getValueDescription(watchedValues[metric.key])}
+                        {getValueDescription(watchedValues[metric.key], metric.key)}
                       </div>
                     </div>
                   </div>
@@ -277,30 +381,158 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
 
           {/* Pain Location (conditional) */}
           {painLevel > 3 && (
-            <Card>
-              <CardHeader>
-                <FormLabel className="flex items-center gap-2">
-                  <Icon name="pain" className="text-red-600" />
-                  Wo hast du Schmerzen?
-                </FormLabel>
-              </CardHeader>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="painLocation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          placeholder="z.B. Rechtes Knie, unterer Rücken, Schulter..."
-                          className="min-h-[80px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+            <div className="space-y-4">
+              {/* Warnung bei hohen Schmerzwerten */}
+              {painLevel >= 7 && (
+                <div className="border-red-200 bg-red-50 border rounded-lg p-4 w-full">
+                  <div className="flex items-start gap-3">
+                    <i className="fa-solid fa-triangle-exclamation text-red-600 text-base flex-shrink-0 mt-0.5"></i>
+                    <div className="text-red-800 text-sm leading-relaxed flex-1">
+                      <strong>Achtung:</strong> Du gibst starke Schmerzen an. Bitte schone dich und überlege, ob du dein Training reduzieren oder pausieren solltest. Bei anhaltenden oder sehr starken Schmerzen wende dich an einen Arzt.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <Card>
+                <CardHeader>
+                  <FormLabel className="flex items-center gap-2">
+                    <i className="fa-solid fa-triangle-exclamation text-red-600"></i>
+                    Wo hast du Schmerzen?
+                  </FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Wähle die betroffenen Körperteile aus (mehrere möglich)
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
+                    {bodyParts.map((bodyPart) => (
+                      <button
+                        key={bodyPart.id}
+                        type="button"
+                        onClick={() => handleBodyPartToggle(bodyPart.id)}
+                        className={`
+                          p-3 rounded-lg border-2 text-sm font-medium transition-all
+                          flex flex-col items-center gap-1 hover:shadow-sm
+                          ${selectedBodyParts.includes(bodyPart.id)
+                            ? 'border-red-500 bg-red-50 text-red-700'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                          }
+                        `}
+                      >
+                        <span className="text-lg">{bodyPart.icon}</span>
+                        <span className="text-xs leading-tight text-center">
+                          {bodyPart.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Ausgewählte Körperteile anzeigen */}
+                  {selectedBodyParts.length > 0 && (
+                    <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                      <p className="text-sm font-medium text-red-800 mb-2">
+                        Ausgewählte Bereiche:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedBodyParts.map((partId) => {
+                          const bodyPart = bodyParts.find(p => p.id === partId);
+                          return (
+                            <Badge key={partId} variant="destructive" className="text-xs">
+                              {bodyPart?.icon} {bodyPart?.label}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
                   )}
-                />
+
+                  {/* Hidden field für form validation */}
+                  <FormField
+                    control={form.control}
+                    name="painLocation"
+                    render={({ field }) => (
+                      <FormItem className="hidden">
+                        <FormControl>
+                          <input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+            </div>
+          )}
+
+          {/* Benachrichtigung an Coach/Eltern - außerhalb des Pain Location Blocks */}
+          {painLevel >= 5 && (
+            <Card className="border-orange-200 bg-orange-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-orange-800">
+                  <Icon name="notification" className="text-orange-600" />
+                  Information weitergeben
+                </CardTitle>
+                <CardDescription className="text-orange-700">
+                  Bei Schmerzen (Level {painLevel}): Möchtest du deinen Coach oder deine Eltern informieren?
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="notify-coach"
+                      checked={notifyCoach}
+                      onCheckedChange={(checked) => setNotifyCoach(checked as boolean)}
+                    />
+                    <Label htmlFor="notify-coach" className="flex items-center gap-2">
+                      <Icon name="coach" className="text-green-600" />
+                      Coach informieren
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="notify-parents"
+                      checked={notifyParents}
+                      onCheckedChange={(checked) => setNotifyParents(checked as boolean)}
+                    />
+                    <Label htmlFor="notify-parents" className="flex items-center gap-2">
+                      <Icon name="parent" className="text-purple-600" />
+                      Eltern informieren
+                    </Label>
+                  </div>
+                </div>
+
+                {(notifyCoach || notifyParents) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="notification-message">
+                      Zusätzliche Nachricht (optional)
+                    </Label>
+                    <Textarea
+                      id="notification-message"
+                      placeholder="z.B. Schmerzen seit gestern, kann nicht vollständig trainieren..."
+                      value={notificationMessage}
+                      onChange={(e) => setNotificationMessage(e.target.value)}
+                      className="min-h-[60px]"
+                    />
+                  </div>
+                )}
+
+                {(notifyCoach || notifyParents) && (
+                  <div className="border-blue-200 bg-blue-50 border rounded-lg p-4 w-full">
+                    <div className="flex items-start gap-3">
+                      <i className="fa-solid fa-circle-info text-blue-600 text-base flex-shrink-0 mt-0.5"></i>
+                      <div className="text-blue-800 text-sm leading-relaxed flex-1">
+                        {notifyCoach && notifyParents && "Dein Coach und deine Eltern werden"}
+                        {notifyCoach && !notifyParents && "Dein Coach wird"}
+                        {!notifyCoach && notifyParents && "Deine Eltern werden"}
+                        {" "}über deine Schmerzen informiert. Die Information wird nach dem Speichern des Check-ins versendet.
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

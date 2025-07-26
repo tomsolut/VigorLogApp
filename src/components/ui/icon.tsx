@@ -1,7 +1,9 @@
 // VigorLog - Font Awesome Icon Component
 // Vereinfachte Verwendung von Font Awesome Icons mit TypeScript Support
 
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 // Font Awesome Icon Mapping für VigorLog
@@ -118,12 +120,32 @@ export function Icon({
   fixedWidth = false,
   ...props 
 }: IconProps) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const iconClass = VigorLogIcons[name];
   const animationClasses = [
     spin && 'fa-spin',
     pulse && 'fa-pulse',
     fixedWidth && 'fa-fw'
   ].filter(Boolean).join(' ');
+
+  // Render nothing on server to prevent hydration mismatch
+  if (!isClient) {
+    return (
+      <span
+        className={cn(
+          'inline-block',
+          sizeClasses[size],
+          className
+        )}
+        {...props}
+      />
+    );
+  }
 
   return (
     <i
@@ -133,6 +155,7 @@ export function Icon({
         animationClasses,
         className
       )}
+      aria-hidden="true"
       {...props}
     />
   );
