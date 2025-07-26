@@ -117,6 +117,27 @@ export default function Home() {
           </Card>
         )}
 
+        {/* GDPR Dual-Consent Demo */}
+        <Card className="mb-12 border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="text-center flex items-center justify-center gap-2">
+              <Icon name="shield" className="text-blue-600" />
+              GDPR Dual-Consent System
+            </CardTitle>
+            <p className="text-center text-muted-foreground">
+              Registrierung für Jugendathleten unter 16 Jahren gemäß DSGVO Art. 8
+            </p>
+          </CardHeader>
+          <CardContent className="text-center">
+            <Link href="/dual-consent-demo">
+              <Button className="h-12 px-8">
+                <Icon name="shield" className="mr-2" />
+                Dual-Consent Demo starten
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         {/* User Roles Demo */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="bg-white rounded-lg p-6 shadow-lg text-center">

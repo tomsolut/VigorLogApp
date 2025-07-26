@@ -3,9 +3,15 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User, UserRole } from '@/types';
+import type { User, UserRole, MinorRegistrationData, ConsentRecord, DualConsentRequest } from '@/types';
 import { storage } from '@/lib/storage';
 import { generateId } from '@/lib/utils';
+import { 
+  calculateAge, 
+  needsParentalConsent, 
+  createDualConsentRecord,
+  validateMinorRegistration 
+} from '@/lib/dual-consent';
 
 interface AuthState {
   // State
@@ -18,9 +24,15 @@ interface AuthState {
   login: (email: string, password: string, role?: UserRole) => Promise<boolean>;
   logout: () => void;
   register: (userData: RegisterUserData) => Promise<boolean>;
+  registerMinor: (data: MinorRegistrationData) => Promise<boolean>;
   switchRole: (newRole: UserRole) => void; // Für Demo-Zwecke
   getCurrentUser: () => User | null;
   clearError: () => void;
+  
+  // Dual-Consent Functions
+  checkConsentStatus: (athleteId: string) => Promise<{ compliant: boolean; missing: string[] }>;
+  requestParentalConsent: (athleteId: string, parentId: string) => Promise<boolean>;
+  approveParentalConsent: (requestId: string, parentId: string) => Promise<boolean>;
   
   // Demo Functions
   createDemoUsers: () => void;
@@ -237,7 +249,7 @@ export const useAuthStore = create<AuthState>()(
       // Demo Functions
       createDemoUsers: () => {
         const demoUsers: User[] = [
-          // Demo Athlete
+          // Demo Athlete (unter 16, benötigt Dual-Consent)
           {
             id: 'demo-athlete-1',
             email: 'max.demo@vigorlog.com',
@@ -254,6 +266,10 @@ export const useAuthStore = create<AuthState>()(
             totalPoints: 250,
             achievements: [],
             healthStatus: 'good',
+            needsParentalConsent: true,
+            hasParentalConsent: true,
+            parentalConsentDate: new Date().toISOString(),
+            parentalConsentBy: 'demo-parent-1'
           },
           // Demo Coach
           {
@@ -335,6 +351,157 @@ export const useAuthStore = create<AuthState>()(
           set({ error: `Demo-${role} nicht gefunden` });
         }
       },
+
+      // Minderjährigen-Registrierung mit Dual-Consent
+      registerMinor: async (data: MinorRegistrationData) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          // Validiere Eingabedaten
+          const validation = validateMinorRegistration(data);
+          if (!validation.valid) {
+            set({ error: `Validierungsfehler: ${validation.errors.join(', ')}`, isLoading: false });
+            return false;
+          }
+
+          const age = calculateAge(data.athlete.birthDate);
+          const needsConsent = needsParentalConsent(data.athlete.birthDate);
+
+          // Erstelle Parent-Account
+          const parentId = generateId();
+          const parentUser: User = {
+            id: parentId,
+            email: data.parent.email,
+            firstName: data.parent.firstName,
+            lastName: data.parent.lastName,
+            role: 'parent',
+            createdAt: new Date().toISOString(),
+            isActive: true,
+            childrenIds: [],
+            phoneNumber: data.parent.phoneNumber,
+            emergencyContact: true,
+            hasDataConsent: true,
+            hasMedicalConsent: true,
+            consentDate: new Date().toISOString(),
+            canGiveConsentFor: [],
+            consentHistory: []
+          };
+
+          // Erstelle Athlete-Account
+          const athleteId = generateId();
+          const athleteUser: User = {
+            id: athleteId,
+            email: data.athlete.email,
+            firstName: data.athlete.firstName,
+            lastName: data.athlete.lastName,
+            role: 'athlete',
+            createdAt: new Date().toISOString(),
+            isActive: true,
+            birthDate: data.athlete.birthDate,
+            sport: data.athlete.sport,
+            teamId: undefined,
+            parentIds: [parentId],
+            currentStreak: 0,
+            totalPoints: 0,
+            achievements: [],
+            healthStatus: 'good',
+            needsParentalConsent: needsConsent,
+            hasParentalConsent: needsConsent, // Consent wird direkt erteilt
+            parentalConsentDate: needsConsent ? new Date().toISOString() : undefined,
+            parentalConsentBy: needsConsent ? parentId : undefined
+          };
+
+          // Update Parent mit Child-Referenz
+          parentUser.childrenIds = [athleteId];
+          if (needsConsent) {
+            parentUser.canGiveConsentFor = [athleteId];
+          }
+
+          // Speichere beide Accounts
+          const parentSuccess = storage.addUser(parentUser);
+          const athleteSuccess = storage.addUser(athleteUser);
+
+          if (!parentSuccess || !athleteSuccess) {
+            set({ error: 'Fehler beim Speichern der Benutzer', isLoading: false });
+            return false;
+          }
+
+          // Erstelle Consent Records falls erforderlich
+          if (needsConsent) {
+            const consentRecords: ConsentRecord[] = [
+              createDualConsentRecord(athleteId, parentId, 'data_processing', data.consents.dataProcessing),
+              createDualConsentRecord(athleteId, parentId, 'medical_data', data.consents.medicalData),
+              createDualConsentRecord(athleteId, parentId, 'parent_access', data.consents.parentAccess)
+            ];
+
+            // Speichere Consent Records (wird in der Storage-Implementation hinzugefügt)
+            console.log('Dual-Consent Records created:', consentRecords);
+          }
+
+          // Log in as Athlete
+          set({
+            currentUser: athleteUser,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null
+          });
+
+          console.log(`Minor registered: ${athleteUser.firstName} ${athleteUser.lastName} (${age} Jahre, Parent: ${parentUser.firstName} ${parentUser.lastName})`);
+          return true;
+
+        } catch (error) {
+          console.error('Minor registration error:', error);
+          set({
+            error: 'Fehler bei der Minderjährigen-Registrierung',
+            isLoading: false
+          });
+          return false;
+        }
+      },
+
+      // Consent-Status prüfen
+      checkConsentStatus: async (athleteId: string) => {
+        const users = storage.getUsers();
+        const athlete = users.find(u => u.id === athleteId && u.role === 'athlete') as any;
+        
+        if (!athlete) {
+          return { compliant: false, missing: ['Athlet nicht gefunden'] };
+        }
+
+        const age = calculateAge(athlete.birthDate);
+        if (age >= 16) {
+          return { compliant: true, missing: [] };
+        }
+
+        const missing: string[] = [];
+        
+        if (!athlete.hasParentalConsent) {
+          missing.push('Parental Consent');
+        }
+        
+        if (athlete.parentIds.length === 0) {
+          missing.push('Parent-Verknüpfung');
+        }
+
+        return {
+          compliant: missing.length === 0,
+          missing
+        };
+      },
+
+      // Parental Consent anfordern
+      requestParentalConsent: async (athleteId: string, parentId: string) => {
+        // Hier würde normalerweise eine E-Mail-Benachrichtigung versendet werden
+        console.log(`Parental consent requested for athlete ${athleteId} from parent ${parentId}`);
+        return true;
+      },
+
+      // Parental Consent genehmigen  
+      approveParentalConsent: async (requestId: string, parentId: string) => {
+        // Implementation für Consent-Genehmigung
+        console.log(`Parental consent approved by parent ${parentId} for request ${requestId}`);
+        return true;
+      },
     }),
     {
       name: 'vigorlog-auth',
@@ -358,8 +525,12 @@ export const useAuth = () => {
     login: store.login,
     logout: store.logout,
     register: store.register,
+    registerMinor: store.registerMinor,
     switchRole: store.switchRole,
     clearError: store.clearError,
+    checkConsentStatus: store.checkConsentStatus,
+    requestParentalConsent: store.requestParentalConsent,
+    approveParentalConsent: store.approveParentalConsent,
     createDemoUsers: store.createDemoUsers,
     loginAsDemo: store.loginAsDemo,
   };

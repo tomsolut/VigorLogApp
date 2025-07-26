@@ -41,6 +41,11 @@ export interface Athlete extends BaseUser {
   totalPoints: number;
   achievements: Achievement[];
   healthStatus: HealthStatus;
+  // GDPR Dual-Consent für <16 Jahre
+  needsParentalConsent: boolean;
+  hasParentalConsent: boolean;
+  parentalConsentDate?: string;
+  parentalConsentBy?: string; // Parent ID
 }
 
 // Coach-Daten
@@ -61,6 +66,9 @@ export interface Parent extends BaseUser {
   hasDataConsent: boolean;
   hasMedicalConsent: boolean;
   consentDate?: string;
+  // GDPR Dual-Consent Management
+  canGiveConsentFor: string[]; // Athlete IDs unter 16
+  consentHistory: ConsentRecord[];
 }
 
 // Admin-Daten
@@ -172,11 +180,16 @@ export interface ConsentRecord {
   id: string;
   userId: string;
   parentId?: string; // für Minderjährige
-  consentType: 'data_processing' | 'medical_data' | 'parent_access' | 'marketing';
+  consentType: 'data_processing' | 'medical_data' | 'parent_access' | 'marketing' | 'dual_consent_minor';
   granted: boolean;
   grantedAt: string;
   revokedAt?: string;
   version: string;
+  // Dual-Consent spezifisch
+  isForMinor?: boolean;
+  minorAge?: number;
+  legalBasisGermany?: 'art6_1a_gdpr' | 'art8_gdpr_parental_consent';
+  documentationUrl?: string;
 }
 
 // API Response Types
@@ -221,6 +234,46 @@ export interface RegisterFormData extends LoginFormData {
   lastName: string;
   confirmPassword: string;
   agreeToTerms: boolean;
+  // GDPR Dual-Consent für Athleten
+  birthDate?: string;
+  parentEmail?: string; // Required für <16 Jahre
+  parentConsent?: boolean; // Required für <16 Jahre
+  acknowledgeMinorRights?: boolean; // Required für <16 Jahre
+}
+
+// Dual-Consent Flow Types
+export interface DualConsentRequest {
+  id: string;
+  athleteId: string;
+  parentId: string;
+  requestedAt: string;
+  status: 'pending' | 'approved' | 'rejected' | 'expired';
+  consentTypes: string[];
+  approvedAt?: string;
+  rejectedAt?: string;
+  expiresAt: string;
+  notificationsSent: number;
+}
+
+export interface MinorRegistrationData {
+  athlete: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    birthDate: string;
+    sport: string;
+  };
+  parent: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber?: string;
+  };
+  consents: {
+    dataProcessing: boolean;
+    medicalData: boolean;
+    parentAccess: boolean;
+  };
 }
 
 // Dashboard Data Types
