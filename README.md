@@ -44,6 +44,10 @@ VigorLog is a Progressive Web App designed to prevent injuries in young athletes
 - **Font Awesome** - Icon system
 - **Custom Icon Components** - Type-safe icon wrappers
 
+### Design System (In Evaluation)
+- **Option 1**: Figma + shadcn/ui Hybrid (Branch: `feature/figma-design-integration`)
+- **Option 2**: Metronic v9.2.3 Premium Framework (Branch: `feature/metronic-integration`)
+
 ### Development
 - **pnpm** - Package manager
 - **ESLint** - Code linting
@@ -107,7 +111,10 @@ vigorlog/
 │   ├── stores/          # Zustand state stores
 │   └── types/           # TypeScript definitions
 ├── public/              # Static assets
-└── docs/               # Documentation
+├── docs/               # Documentation
+│   ├── Wissen/         # Knowledge base
+│   └── design-approach/ # Design system evaluation
+└── metronic/           # Metronic framework (gitignored)
 ```
 
 ## 🎯 Key Features Implementation
@@ -135,6 +142,12 @@ vigorlog/
 - **Lazy Loading**: Components loaded on demand
 - **Offline Support**: PWA with service worker
 - **Optimistic Updates**: Instant UI feedback
+
+### 5. Admin Features
+- **User Management**: Comprehensive user administration with search and filters
+- **System Statistics**: Real-time metrics dashboard
+- **Team Management**: Create and manage athlete teams (in development)
+- **Settings Panel**: System configuration (planned)
 
 ## 🔧 Configuration
 
@@ -169,6 +182,19 @@ Edit `src/app/globals.css` to customize the color scheme:
 
 #### Health Metrics
 Modify `src/components/forms/daily-checkin-form.tsx` to adjust metrics.
+
+## 📚 Documentation
+
+### Knowledge Base
+Access the comprehensive knowledge base at `/docs/Wissen/`:
+- [shadcn/ui Overview](./docs/Wissen/shadcn-ui/overview.md)
+- [Next.js 15 Guide](./docs/Wissen/nextjs-15/app-router-guide.md)
+- [GDPR Compliance](./docs/Wissen/gdpr-compliance/dual-consent-implementation.md)
+
+### Design Approaches
+Two design system approaches are being evaluated:
+- [Figma Integration Guide](./docs/design-approach/figma-integration-guide.md)
+- [Metronic Integration Guide](./docs/design-approach/metronic-integration-guide.md)
 
 ## 🧪 Development
 

@@ -23,9 +23,18 @@ Diese Wissensdatenbank enthält wichtige Dokumentationen und Best Practices für
 - [Age Verification](./gdpr-compliance/age-verification.md) - Altersverifikation
 - [Data Protection Checklist](./gdpr-compliance/data-protection-checklist.md) - Datenschutz-Checkliste
 
+### 🎨 [Design System](../design-approach/)
+- [Figma Integration Guide](../design-approach/figma-integration-guide.md) - Figma + shadcn/ui Ansatz
+- [Metronic Integration Guide](../design-approach/metronic-integration-guide.md) - Metronic Premium Framework
+
 ## 🔄 Update-Historie
 
-- **2025-07-26**: Initiale Erstellung der Wissensdatenbank
+- **2025-01-26**: Design-System-Dokumentation
+  - Figma-Integration-Ansatz dokumentiert
+  - Metronic-Framework-Analyse hinzugefügt
+  - Feature-Branches für beide Ansätze erstellt
+
+- **2025-01-25**: Initiale Erstellung der Wissensdatenbank
   - shadcn/ui Dokumentation hinzugefügt
   - Next.js 15 Best Practices dokumentiert
   - Zustand State Management Guide erstellt
