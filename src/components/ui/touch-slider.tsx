@@ -65,16 +65,19 @@ export function TouchSlider({
   hapticFeedback = true,
 }: TouchSliderProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [localValue, setLocalValue] = useState(value);
+  // Ensure value is within bounds
+  const clampedValue = Math.max(min, Math.min(max, value));
+  const [localValue, setLocalValue] = useState(clampedValue);
   const sliderRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   // Update local value when prop changes
   useEffect(() => {
     if (!isDragging) {
-      setLocalValue(value);
+      const clampedValue = Math.max(min, Math.min(max, value));
+      setLocalValue(clampedValue);
     }
-  }, [value, isDragging]);
+  }, [value, isDragging, min, max]);
 
   // Haptic feedback for mobile
   const triggerHaptic = useCallback(() => {
@@ -192,7 +195,7 @@ export function TouchSlider({
       ticks.push(
         <div
           key={i}
-          className="absolute top-1/2 -translate-y-1/2 w-0.5 h-2 bg-muted-foreground/30"
+          className="absolute w-0.5 h-full bg-muted-foreground/20"
           style={{ left: `${tickPosition}%` }}
         />
       );

@@ -281,7 +281,7 @@ export default function HealthComponentsPage() {
               <h3 className="text-sm font-medium">Basic Touch Slider</h3>
               <div className="max-w-md mx-auto space-y-6">
                 <TouchSlider
-                  value={healthMetrics.energy}
+                  value={healthMetrics.energy / 10}
                   onChange={(v) => console.log('Energy:', v)}
                   label="Energie Level"
                   min={0}
