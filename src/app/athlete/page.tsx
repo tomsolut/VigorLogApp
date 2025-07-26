@@ -17,6 +17,24 @@ import { getTodayString, formatDate, calculateStreak } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import type { DailyCheckin } from '@/types';
 
+// Hilfsfunktion für die richtige Farbgebung basierend auf Metrik und Wert
+function getMetricValueColor(metric: string, value: number): string {
+  // Metriken wo niedrige Werte gut sind
+  const negativeMetrics = ['painLevel', 'pain', 'fatigueLevel', 'fatigue', 'stressLevel', 'stress', 'muscleSoreness'];
+  
+  if (negativeMetrics.includes(metric)) {
+    // Niedrig = gut (grün), Hoch = schlecht (rot)
+    if (value <= 3) return 'text-green-600';
+    if (value <= 6) return 'text-orange-600';
+    return 'text-red-600';
+  } else {
+    // Hoch = gut (grün), Niedrig = schlecht (rot) - für Schlaf und Stimmung
+    if (value >= 7) return 'text-green-600';
+    if (value >= 4) return 'text-orange-600';
+    return 'text-red-600';
+  }
+}
+
 export default function AthleteDashboard() {
   const { user, logout } = useAuth();
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckin | null>(null);
@@ -185,33 +203,59 @@ export default function AthleteDashboard() {
 
         {/* Quick Stats */}
         {todayCheckin && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <Card>
               <CardContent className="pt-6 text-center">
                 <HealthIcon metric="sleep" className="text-blue-600 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold">{todayCheckin.sleepQuality}</div>
+                <div className={`text-2xl font-bold ${getMetricValueColor('sleepQuality', todayCheckin.sleepQuality)}`}>
+                  {todayCheckin.sleepQuality}
+                </div>
                 <div className="text-sm text-muted-foreground">Schlaf</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6 text-center">
                 <HealthIcon metric="mood" className="text-green-600 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold">{todayCheckin.moodRating}</div>
+                <div className={`text-2xl font-bold ${getMetricValueColor('moodRating', todayCheckin.moodRating)}`}>
+                  {todayCheckin.moodRating}
+                </div>
                 <div className="text-sm text-muted-foreground">Stimmung</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6 text-center">
                 <HealthIcon metric="pain" className="text-red-600 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold">{todayCheckin.painLevel}</div>
+                <div className={`text-2xl font-bold ${getMetricValueColor('painLevel', todayCheckin.painLevel)}`}>
+                  {todayCheckin.painLevel}
+                </div>
                 <div className="text-sm text-muted-foreground">Schmerzen</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6 text-center">
                 <HealthIcon metric="heart" className="text-purple-600 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold">{todayCheckin.stressLevel}</div>
+                <div className={`text-2xl font-bold ${getMetricValueColor('stressLevel', todayCheckin.stressLevel)}`}>
+                  {todayCheckin.stressLevel}
+                </div>
                 <div className="text-sm text-muted-foreground">Stress</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <HealthIcon metric="fatigue" className="text-orange-600 text-2xl mx-auto mb-2" />
+                <div className={`text-2xl font-bold ${getMetricValueColor('fatigueLevel', todayCheckin.fatigueLevel)}`}>
+                  {todayCheckin.fatigueLevel}
+                </div>
+                <div className="text-sm text-muted-foreground">Müdigkeit</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <HealthIcon metric="heart" className="text-red-600 text-2xl mx-auto mb-2" />
+                <div className={`text-2xl font-bold ${getMetricValueColor('muscleSoreness', todayCheckin.muscleSoreness)}`}>
+                  {todayCheckin.muscleSoreness}
+                </div>
+                <div className="text-sm text-muted-foreground">Muskelkater</div>
               </CardContent>
             </Card>
           </div>

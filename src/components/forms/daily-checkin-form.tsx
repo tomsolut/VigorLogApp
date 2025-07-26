@@ -243,13 +243,14 @@ export function DailyCheckinForm({ onSuccess, onCancel, existingCheckin }: Daily
   };
 
   const getSliderColor = (value: number, metric: HealthMetric) => {
-    if (metric.key === 'painLevel' || metric.key === 'fatigueLevel' || metric.key === 'stressLevel') {
+    // Metriken wo hohe Werte schlecht sind
+    if (metric.key === 'painLevel' || metric.key === 'fatigueLevel' || metric.key === 'stressLevel' || metric.key === 'muscleSoreness') {
       // Für negative Metriken: Rot bei hohen Werten
       if (value >= 7) return 'bg-red-500';
       if (value >= 5) return 'bg-orange-500';
       return 'bg-green-500';
     } else {
-      // Für positive Metriken: Grün bei hohen Werten
+      // Für positive Metriken (Schlaf, Stimmung): Grün bei hohen Werten
       if (value >= 7) return 'bg-green-500';
       if (value >= 5) return 'bg-orange-500';
       return 'bg-red-500';

@@ -25,7 +25,7 @@ export const demoTeams: Team[] = [
     sport: 'Fußball',
     ageGroup: 'U16',
     coachId: 'demo-coach-1',
-    athleteIds: ['demo-athlete-1', 'athlete-2', 'athlete-3'],
+    athleteIds: ['demo-athlete-1', 'demo-athlete-2', 'athlete-2', 'athlete-3'],
     clubId: 'club-1',
     createdAt: '2024-01-01T10:00:00Z'
   },
@@ -58,6 +58,29 @@ export const updatedDemoAthlete: User = {
   totalPoints: 250,
   achievements: [],
   healthStatus: 'good',
+  needsParentalConsent: true,
+  hasParentalConsent: true,
+  parentalConsentDate: '2024-01-01T10:00:00Z',
+  parentalConsentBy: 'demo-parent-1'
+} as any;
+
+// Update demo athlete 2 to have parent relationship
+export const updatedDemoAthlete2: User = {
+  id: 'demo-athlete-2',
+  email: 'sophie.demo@vigorlog.com',
+  role: 'athlete',
+  firstName: 'Sophie',
+  lastName: 'Müller',
+  createdAt: '2024-01-01T10:00:00Z',
+  isActive: true,
+  birthDate: '2009-07-22',
+  sport: 'Basketball',
+  teamId: 'team-1',
+  parentIds: ['demo-parent-1'],
+  currentStreak: 0,
+  totalPoints: 180,
+  achievements: [],
+  healthStatus: 'unknown',
   needsParentalConsent: true,
   hasParentalConsent: true,
   parentalConsentDate: '2024-01-01T10:00:00Z',
@@ -149,7 +172,7 @@ export const additionalAthletes: User[] = [
 // Generate demo checkins for additional athletes
 export function generateDemoCheckins(): DailyCheckin[] {
   const checkins: DailyCheckin[] = [];
-  const athleteIds = ['demo-athlete-1', 'athlete-2', 'athlete-3', 'athlete-4', 'athlete-5'];
+  const athleteIds = ['demo-athlete-1', 'demo-athlete-2', 'athlete-2', 'athlete-3', 'athlete-4', 'athlete-5'];
   
   athleteIds.forEach(athleteId => {
     // Generate last 14 days of checkins
@@ -275,6 +298,12 @@ export function initializeDemoData() {
     const demoAthleteIndex = existingUsers.findIndex(u => u.id === 'demo-athlete-1');
     if (demoAthleteIndex !== -1) {
       existingUsers[demoAthleteIndex] = updatedDemoAthlete;
+    }
+    
+    // Update demo-athlete-2 to have parent relationship
+    const demoAthlete2Index = existingUsers.findIndex(u => u.id === 'demo-athlete-2');
+    if (demoAthlete2Index !== -1) {
+      existingUsers[demoAthlete2Index] = updatedDemoAthlete2;
     }
     
     // Add demo coach if not exists
