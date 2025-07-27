@@ -20,6 +20,7 @@ export const VigorLogIcons = {
   coach: 'fa-solid fa-whistle',
   parent: 'fa-solid fa-people-group',
   admin: 'fa-solid fa-user-shield',
+  user: 'fa-solid fa-user',
   
   // Health Metrics
   sleep: 'fa-solid fa-bed',
@@ -57,6 +58,8 @@ export const VigorLogIcons = {
   error: 'fa-solid fa-circle-xmark',
   info: 'fa-solid fa-circle-info',
   notification: 'fa-solid fa-bell',
+  photo: 'fa-solid fa-camera',
+  recovery: 'fa-solid fa-heart-circle-plus',
   
   // Data & Charts
   chart: 'fa-solid fa-chart-line',
@@ -113,6 +116,8 @@ export const VigorLogIcons = {
   chevronLeft: 'fa-solid fa-chevron-left',
   chevronRight: 'fa-solid fa-chevron-right',
   'chevron-right': 'fa-solid fa-chevron-right',
+  'chevron-up': 'fa-solid fa-chevron-up',
+  'chevron-down': 'fa-solid fa-chevron-down',
   arrowLeft: 'fa-solid fa-arrow-left',
   arrowRight: 'fa-solid fa-arrow-right',
   'arrow-left': 'fa-solid fa-arrow-left',

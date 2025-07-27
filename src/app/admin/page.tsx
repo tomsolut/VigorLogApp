@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Icon, RoleIcon } from '@/components/ui/icon';
+import { HealthScoreCard } from '@/components/ui/health-score-card';
+import { AlertSummary } from '@/components/ui/alert-summary';
+import { AdminNav } from '@/components/ui/mobile-nav';
 import { useAuth } from '@/stores/auth';
 import { storage } from '@/lib/storage';
 import { getTodayString } from '@/lib/utils';
@@ -25,6 +28,15 @@ interface SystemStats {
   activeAlerts: number;
 }
 
+interface AdminAlert {
+  id: string;
+  athleteName: string;
+  title: string;
+  message: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  createdAt: string;
+}
+
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -40,6 +52,7 @@ export default function AdminDashboard() {
     totalCheckins: 0,
     activeAlerts: 0
   });
+  const [systemAlerts, setSystemAlerts] = useState<AdminAlert[]>([]);
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -68,6 +81,20 @@ export default function AdminDashboard() {
       c.painLevel > 7 || c.stressLevel > 7 || c.fatigueLevel > 8
     ).length;
 
+    // Lade Alerts für AdminAlert Component
+    const alerts = storage.getAlerts()?.filter(alert => !alert.isResolved) || [];
+    const adminAlerts: AdminAlert[] = alerts.map(alert => {
+      const athlete = users.find(u => u.id === alert.athleteId);
+      return {
+        id: alert.id,
+        athleteName: athlete ? `${athlete.firstName} ${athlete.lastName}` : 'Unbekannter Athlet',
+        title: alert.title,
+        message: alert.message,
+        severity: alert.severity,
+        createdAt: new Date(alert.createdAt).toLocaleDateString('de-DE')
+      };
+    });
+
     setStats({
       totalUsers: users.length,
       usersByRole,
@@ -76,8 +103,15 @@ export default function AdminDashboard() {
       activeAlerts
     });
 
-    logger.info('AdminDashboard', 'Stats loaded', { stats });
+    setSystemAlerts(adminAlerts);
+
+    logger.info('AdminDashboard', 'Stats loaded', { stats, alertsCount: adminAlerts.length });
   }, [user, router]);
+
+  const handleAlertClick = (alert: AdminAlert) => {
+    // Navigate to athlete or alerts management page
+    router.push(`/admin/alerts?alertId=${alert.id}`);
+  };
 
   if (!user || user.role !== 'admin') {
     return null;
@@ -114,59 +148,45 @@ export default function AdminDashboard() {
 
         {/* System Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-blue-200 bg-blue-50/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Icon name="users" className="text-blue-600" />
-                Gesamtnutzer
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-600">{stats.totalUsers}</div>
-              <p className="text-sm text-muted-foreground">Registrierte Benutzer</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-green-200 bg-green-50/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Icon name="check-circle" className="text-green-600" />
-                Check-ins heute
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">{stats.todayCheckins}</div>
-              <p className="text-sm text-muted-foreground">von {stats.usersByRole.athletes} Athleten</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-purple-200 bg-purple-50/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Icon name="chart" className="text-purple-600" />
-                Gesamt Check-ins
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-600">{stats.totalCheckins}</div>
-              <p className="text-sm text-muted-foreground">Alle Zeit</p>
-            </CardContent>
-          </Card>
-
-          <Card className={stats.activeAlerts > 0 ? "border-red-200 bg-red-50/50" : "border-gray-200 bg-gray-50/50"}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Icon name="warning" className={stats.activeAlerts > 0 ? "text-red-600" : "text-gray-600"} />
-                Aktive Warnungen
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-3xl font-bold ${stats.activeAlerts > 0 ? "text-red-600" : "text-gray-600"}`}>
-                {stats.activeAlerts}
-              </div>
-              <p className="text-sm text-muted-foreground">Kritische Werte</p>
-            </CardContent>
-          </Card>
+          <HealthScoreCard
+            title="Gesamtnutzer"
+            value={stats.totalUsers}
+            subtitle="Registrierte Benutzer"
+            icon="users"
+            iconColor="text-blue-600"
+            showRing={false}
+            accentColor="blue"
+          />
+          
+          <HealthScoreCard
+            title="Check-ins heute"
+            value={stats.todayCheckins}
+            subtitle={`von ${stats.usersByRole.athletes} Athleten`}
+            icon="check-circle"
+            iconColor="text-green-600"
+            showRing={false}
+            accentColor="green"
+          />
+          
+          <HealthScoreCard
+            title="Gesamt Check-ins"
+            value={stats.totalCheckins}
+            subtitle="Alle Zeit"
+            icon="chart"
+            iconColor="text-purple-600"
+            showRing={false}
+            accentColor="purple"
+          />
+          
+          <HealthScoreCard
+            title="Aktive Warnungen"
+            value={stats.activeAlerts}
+            subtitle="Kritische Werte"
+            icon="warning"
+            iconColor={stats.activeAlerts > 0 ? "text-red-600" : "text-gray-600"}
+            showRing={false}
+            accentColor={stats.activeAlerts > 0 ? "red" : "gray"}
+          />
         </div>
 
         {/* User Distribution */}
@@ -206,8 +226,12 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Quick Actions */}
+          <div className="lg:col-span-2">
+            <h2 className="text-xl font-semibold mb-4">Schnellzugriff</h2>
+            <div className="grid md:grid-cols-2 gap-4">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
               <Icon name="users" className="text-blue-600 text-3xl mx-auto mb-3" />
@@ -263,6 +287,19 @@ export default function AdminDashboard() {
               </Button>
             </CardContent>
           </Card>
+            </div>
+          </div>
+
+          {/* System Alerts */}
+          <div className="lg:col-span-1">
+            <AlertSummary
+              alerts={systemAlerts}
+              onAlertClick={handleAlertClick}
+              onViewAll={() => router.push('/admin/alerts')}
+              maxItems={4}
+              showResolveButton={false}
+            />
+          </div>
         </div>
 
         {/* Recent Activity */}
@@ -292,6 +329,9 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Mobile Navigation */}
+      <AdminNav alerts={systemAlerts.length} />
     </div>
   );
 }

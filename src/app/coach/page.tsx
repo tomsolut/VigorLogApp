@@ -4,6 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { Icon } from '@/components/ui/icon';
+import { TeamHealthOverview as TeamHealthOverviewComponent } from '@/components/ui/team-health-overview';
+import { AlertSummary } from '@/components/ui/alert-summary';
+import { HealthScoreCard } from '@/components/ui/health-score-card';
+import { CoachNav } from '@/components/ui/mobile-nav';
 import { storage } from '@/lib/storage';
 import { Alert, Athlete, Coach, DailyCheckin, Team } from '@/types';
 import { formatDate, getHealthStatusColor, getTodayString, isToday } from '@/lib/utils';
@@ -243,51 +247,41 @@ export default function CoachDashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-card p-6 rounded-xl border border-border">
-            <div className="flex items-center justify-between mb-2">
-              <Icon name="users" className="text-2xl text-primary" />
-              <span className="text-sm text-muted-foreground">Athleten</span>
-            </div>
-            <p className="text-3xl font-bold text-foreground">{athletes.length}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              in {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
-            </p>
-          </div>
-
-          <div className="bg-card p-6 rounded-xl border border-border">
-            <div className="flex items-center justify-between mb-2">
-              <Icon name="check-circle" className="text-2xl text-green-600" />
-              <span className="text-sm text-muted-foreground">Check-ins heute</span>
-            </div>
-            <p className="text-3xl font-bold text-foreground">{todayCheckins}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {checkInRate}% Check-in Rate
-            </p>
-          </div>
-
-          <div className="bg-card p-6 rounded-xl border border-border">
-            <div className="flex items-center justify-between mb-2">
-              <Icon name="exclamation-triangle" className="text-2xl text-orange-600" />
-              <span className="text-sm text-muted-foreground">Aktive Warnungen</span>
-            </div>
-            <p className="text-3xl font-bold text-foreground">{activeAlerts.length}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {activeAlerts.filter(a => a.severity === 'critical').length} kritisch
-            </p>
-          </div>
-
-          <div className="bg-card p-6 rounded-xl border border-border">
-            <div className="flex items-center justify-between mb-2">
-              <Icon name="fire" className="text-2xl text-primary" />
-              <span className="text-sm text-muted-foreground">Team Streak</span>
-            </div>
-            <p className="text-3xl font-bold text-foreground">
-              {Math.max(...teamHealth.map(h => h.currentStreak), 0)}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Tage in Folge
-            </p>
-          </div>
+          <HealthScoreCard
+            title="Athleten"
+            value={athletes.length}
+            subtitle={`in ${teams.length} ${teams.length === 1 ? 'Team' : 'Teams'}`}
+            icon="users"
+            iconColor="text-primary"
+            showRing={false}
+          />
+          
+          <HealthScoreCard
+            title="Check-ins heute"
+            value={todayCheckins}
+            subtitle={`${checkInRate}% Check-in Rate`}
+            icon="check-circle"
+            iconColor="text-green-600"
+            showRing={false}
+          />
+          
+          <HealthScoreCard
+            title="Aktive Warnungen"
+            value={activeAlerts.length}
+            subtitle={`${activeAlerts.filter(a => a.severity === 'critical').length} kritisch`}
+            icon="warning"
+            iconColor="text-orange-600"
+            showRing={false}
+          />
+          
+          <HealthScoreCard
+            title="Team Streak"
+            value={Math.max(...teamHealth.map(h => h.currentStreak), 0)}
+            subtitle="Tage in Folge"
+            icon="fire"
+            iconColor="text-primary"
+            showRing={false}
+          />
         </div>
 
         {/* Team Filter */}
@@ -309,123 +303,48 @@ export default function CoachDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Athletes Overview */}
           <div className="lg:col-span-2">
-            <div className="bg-card rounded-xl border border-border p-6">
-              <h2 className="text-2xl font-bold text-foreground mb-4">
-                Team Gesundheitsübersicht
-              </h2>
-              
-              <div className="space-y-2">
-                {filteredTeamHealth.map(health => (
-                  <div
-                    key={health.athleteId}
-                    onClick={() => handleAthleteClick(health.athleteId)}
-                    className="flex items-center justify-between p-4 rounded-lg hover:bg-accent/10 cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-3 h-3 rounded-full ${
-                        health.healthStatus === 'excellent' ? 'bg-green-600' :
-                        health.healthStatus === 'good' ? 'bg-blue-600' :
-                        health.healthStatus === 'concern' ? 'bg-orange-600' :
-                        'bg-red-600'
-                      }`} />
-                      <div>
-                        <p className="font-semibold text-foreground">{health.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {health.todayCheckin ? (
-                            <span className="text-green-600 flex items-center gap-1">
-                              <Icon name="check" className="text-xs" />
-                              Check-in heute
-                            </span>
-                          ) : (
-                            `Letzter Check-in: ${health.lastCheckin === 'Kein Check-in' ? health.lastCheckin : formatDate(health.lastCheckin)}`
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-4">
-                      {health.alertCount > 0 && (
-                        <div className="flex items-center gap-1 text-orange-600">
-                          <Icon name="exclamation-triangle" className="text-sm" />
-                          <span className="text-sm font-medium">{health.alertCount}</span>
-                        </div>
-                      )}
-                      {health.currentStreak > 0 && (
-                        <div className="flex items-center gap-1 text-primary">
-                          <Icon name="fire" className="text-sm" />
-                          <span className="text-sm font-medium">{health.currentStreak}</span>
-                        </div>
-                      )}
-                      <Icon name="chevron-right" className="text-muted-foreground" />
-                    </div>
-                  </div>
-                ))}
-                
-                {filteredTeamHealth.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">
-                    Keine Athleten im ausgewählten Team
-                  </p>
-                )}
-              </div>
-            </div>
+            <TeamHealthOverviewComponent
+              teamName={selectedTeam === 'all' ? 'Alle Teams' : teams.find(t => t.id === selectedTeam)?.name || 'Team'}
+              members={filteredTeamHealth.map(health => ({
+                id: health.athleteId,
+                name: health.name,
+                healthScore: 
+                  health.healthStatus === 'excellent' ? 90 :
+                  health.healthStatus === 'good' ? 75 :
+                  health.healthStatus === 'concern' ? 50 : 25,
+                status: health.healthStatus,
+                lastCheckin: health.todayCheckin ? 'Heute' : health.lastCheckin,
+                hasAlert: health.alertCount > 0,
+                streak: health.currentStreak
+              }))}
+              onMemberClick={(memberId) => handleAthleteClick(memberId)}
+            />
           </div>
 
           {/* Alerts */}
           <div className="lg:col-span-1">
-            <div className="bg-card rounded-xl border border-border p-6">
-              <h2 className="text-2xl font-bold text-foreground mb-4">
-                Aktuelle Warnungen
-              </h2>
-              
-              <div className="space-y-3">
-                {activeAlerts.slice(0, 5).map(alert => {
-                  const athlete = athletes.find(a => a.id === alert.athleteId);
-                  return (
-                    <div
-                      key={alert.id}
-                      onClick={() => handleAlertClick(alert)}
-                      className="p-3 rounded-lg border border-border hover:bg-accent/10 cursor-pointer transition-colors"
-                    >
-                      <div className="flex items-start gap-3">
-                        <Icon 
-                          name={getAlertIcon(alert.severity)} 
-                          className={`text-lg mt-0.5 ${getAlertColor(alert.severity)}`} 
-                        />
-                        <div className="flex-1">
-                          <p className="font-medium text-foreground text-sm">
-                            {athlete?.firstName} {athlete?.lastName}
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {alert.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {formatDate(alert.createdAt)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                
-                {activeAlerts.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">
-                    Keine aktiven Warnungen
-                  </p>
-                )}
-                
-                {activeAlerts.length > 5 && (
-                  <button
-                    onClick={() => router.push('/coach/alerts')}
-                    className="w-full text-center text-sm text-primary hover:text-primary/80 font-medium pt-2"
-                  >
-                    Alle {activeAlerts.length} Warnungen anzeigen →
-                  </button>
-                )}
-              </div>
-            </div>
+            <AlertSummary
+              alerts={activeAlerts.map(alert => ({
+                id: alert.id,
+                athleteName: `${athletes.find(a => a.id === alert.athleteId)?.firstName} ${athletes.find(a => a.id === alert.athleteId)?.lastName}`,
+                title: alert.title,
+                message: alert.message,
+                severity: alert.severity,
+                createdAt: formatDate(alert.createdAt)
+              }))}
+              onAlertClick={(alert) => handleAlertClick({ 
+                ...activeAlerts.find(a => a.id === alert.id)!,
+                ...alert
+              })}
+              onViewAll={() => router.push('/coach/alerts')}
+              maxItems={5}
+            />
           </div>
         </div>
       </div>
+      
+      {/* Mobile Navigation */}
+      <CoachNav alerts={activeAlerts.length} />
     </div>
   );
 }
