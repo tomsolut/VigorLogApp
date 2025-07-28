@@ -13,14 +13,15 @@ import {
   MetronicTabsTrigger,
   MetronicTabsContent,
 } from '@/components/ui/metronic';
-import { 
-  Button as MantineButton, 
-  Card as MantineCard, 
-  Progress as MantineProgress,
-  Badge as MantineBadge,
-  Table as MantineTable,
-  Tabs as MantineTabs,
-} from '@mantine/core';
+// Mantine imports removed - package not installed
+// import { 
+//   Button as MantineButton, 
+//   Card as MantineCard, 
+//   Progress as MantineProgress,
+//   Badge as MantineBadge,
+//   Table as MantineTable,
+//   Tabs as MantineTabs,
+// } from '@mantine/core';
 import { Activity } from 'lucide-react';
 
 // Performance measurement utility
@@ -311,7 +312,7 @@ export default function PerformanceTestPage() {
                 Mantine is {((bundleSizes.mantine.total / bundleSizes.shadcn.total - 1) * 100).toFixed(0)}% larger than shadcn/ui
               </span>
             </div>
-            <MetronicProgress value={(bundleSizes.shadcn.total / bundleSizes.mantine.total) * 100} size="sm" />
+            <MetronicProgress value={(bundleSizes.shadcn.total / bundleSizes.mantine.total) * 100} />
           </div>
         </Card>
 
@@ -346,12 +347,12 @@ export default function PerformanceTestPage() {
                 </div>
               </div>
               <div>
-                <h3 className="text-sm font-medium mb-2">Mantine UI Button</h3>
+                <h3 className="text-sm font-medium mb-2">Mantine UI Button (shadcn/ui equivalent)</h3>
                 <div className="flex gap-2">
-                  <MantineButton>Primary</MantineButton>
-                  <MantineButton variant="light">Light</MantineButton>
-                  <MantineButton variant="outline">Outline</MantineButton>
-                  <MantineButton variant="subtle">Subtle</MantineButton>
+                  <Button>Primary</Button>
+                  <Button variant="secondary">Light</Button>
+                  <Button variant="outline">Outline</Button>
+                  <Button variant="ghost">Subtle</Button>
                 </div>
               </div>
             </MetronicTabsContent>
@@ -373,11 +374,11 @@ export default function PerformanceTestPage() {
                   </MetronicCard>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium mb-2">Mantine UI Card</h3>
-                  <MantineCard shadow="sm" padding="md" radius="md" withBorder>
+                  <h3 className="text-sm font-medium mb-2">Mantine UI Card (shadcn/ui equivalent)</h3>
+                  <Card className="p-4 border">
                     <h4 className="font-semibold">Standard Card</h4>
                     <p className="text-sm text-muted-foreground mt-1">This is a Mantine UI card component with border.</p>
-                  </MantineCard>
+                  </Card>
                 </div>
               </div>
             </MetronicTabsContent>
@@ -391,11 +392,13 @@ export default function PerformanceTestPage() {
               </div>
               <div>
                 <h3 className="text-sm font-medium mb-2">Metronic Progress</h3>
-                <MetronicProgress value={65} showLabel />
+                <MetronicProgress value={65} />
               </div>
               <div>
-                <h3 className="text-sm font-medium mb-2">Mantine UI Progress</h3>
-                <MantineProgress value={65} color="blue" size="md" radius="xl" />
+                <h3 className="text-sm font-medium mb-2">Mantine UI Progress (shadcn/ui equivalent)</h3>
+                <div className="relative h-4 w-full overflow-hidden rounded-full bg-secondary">
+                  <div className="h-full w-[65%] flex-1 bg-blue-600 transition-all"></div>
+                </div>
               </div>
             </MetronicTabsContent>
 
@@ -410,12 +413,12 @@ export default function PerformanceTestPage() {
                 </div>
               </div>
               <div>
-                <h3 className="text-sm font-medium mb-2">Mantine UI Badge</h3>
+                <h3 className="text-sm font-medium mb-2">Mantine UI Badge (shadcn/ui equivalent)</h3>
                 <div className="flex gap-2">
-                  <MantineBadge>Default</MantineBadge>
-                  <MantineBadge variant="light">Light</MantineBadge>
-                  <MantineBadge variant="outline">Outline</MantineBadge>
-                  <MantineBadge color="red">Red</MantineBadge>
+                  <Badge>Default</Badge>
+                  <Badge variant="secondary">Light</Badge>
+                  <Badge variant="outline">Outline</Badge>
+                  <Badge variant="destructive">Red</Badge>
                 </div>
               </div>
             </MetronicTabsContent>

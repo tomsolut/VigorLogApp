@@ -1,6 +1,4 @@
 import { ReactNode } from 'react';
-import { MantineProvider } from '@mantine/core';
-import '@mantine/core/styles.css';
 
 export default function PerformanceTestLayout({
   children,
@@ -8,8 +6,8 @@ export default function PerformanceTestLayout({
   children: ReactNode;
 }) {
   return (
-    <MantineProvider>
+    <div>
       {children}
-    </MantineProvider>
+    </div>
   );
 }
