@@ -1,8 +1,18 @@
-# Mantine UI Migration Guide für VigorLog
+# ⚠️ DEPRECATED: Mantine UI Migration Guide für VigorLog
 
-## Übersicht
+## ❌ Status: VERALTET (Update: 28.07.2025)
 
-Dieser Guide beschreibt die schrittweise Migration von shadcn/ui zu Mantine UI als einheitliches Framework für VigorLog. Mantine UI wurde ausgewählt aufgrund seiner umfangreichen Komponenten-Bibliothek, exzellenten TypeScript-Unterstützung und Mobile-First Ansatz.
+**WICHTIGER HINWEIS**: Dieser Guide ist **NICHT MEHR GÜLTIG**. Nach Performance-Analyse und Framework-Evaluierung wurde entschieden, **NICHT zu Mantine UI zu migrieren**.
+
+**Aktuelle Framework-Entscheidung**: shadcn/ui + Custom Components  
+**Grund**: Performance-Optimierung (10.7KB vs 95KB Bundle Size)  
+**Siehe**: `framework-decision.md` für aktuelle Implementierungsstrategie
+
+---
+
+## Historische Übersicht (Nur zur Dokumentation)
+
+~~Dieser Guide beschreibt die schrittweise Migration von shadcn/ui zu Mantine UI als einheitliches Framework für VigorLog. Mantine UI wurde ausgewählt aufgrund seiner umfangreichen Komponenten-Bibliothek, exzellenten TypeScript-Unterstützung und Mobile-First Ansatz.~~
 
 ## 1. Warum Mantine UI?
 
